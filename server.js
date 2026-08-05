@@ -5,6 +5,26 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
 app.use(express.json({ limit: '1mb' }));
+
+// Basic auth (activated when BASIC_AUTH_PASSWORD env var is set)
+const AUTH_USER = process.env.BASIC_AUTH_USER || 'travel';
+const AUTH_PASS = process.env.BASIC_AUTH_PASSWORD;
+if (AUTH_PASS) {
+  app.use((req, res, next) => {
+    const h = req.headers.authorization;
+    if (!h?.startsWith('Basic ')) {
+      res.set('WWW-Authenticate', 'Basic realm="Travel Planner"');
+      return res.status(401).send('Zugang gesperrt');
+    }
+    const [u, p] = Buffer.from(h.slice(6), 'base64').toString().split(':');
+    if (u !== AUTH_USER || p !== AUTH_PASS) {
+      res.set('WWW-Authenticate', 'Basic realm="Travel Planner"');
+      return res.status(401).send('Falsches Passwort');
+    }
+    next();
+  });
+}
+
 app.use(express.static(__dirname));
 
 app.post('/api/plan-tour', async (req, res) => {
