@@ -213,6 +213,11 @@ body.planning .stop-badge.visible { display: flex; }
 .leaflet-control-zoom a { background: var(--card) !important; color: var(--text) !important; border-color: var(--border) !important; }
 .leaflet-control-zoom a:hover { background: var(--card-hover) !important; }
 
+/* Place images */
+.card-thumb { width: 58px; height: 68px; object-fit: cover; border-radius: 6px; flex-shrink: 0; border: 1px solid var(--border); display: none; }
+.card-thumb.loaded { display: block; }
+.popup-img { width: 100%; height: 130px; object-fit: cover; border-radius: 7px; margin-top: 8px; display: block; }
+
 /* ── TIMELINE OVERLAY ── */
 #timeline-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 2000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
 #timeline-overlay.open { display: flex; }
@@ -399,6 +404,58 @@ const TRIPS = [
   }
 ];
 
+// ── WIKIPEDIA IMAGES ──
+const WIKI_TITLES = {
+  'palermo': 'Palermo', 'monreale': 'Monreale Cathedral', 'cefalu': 'Cefalù',
+  'san-vito': 'San Vito Lo Capo', 'zingaro': 'Zingaro nature reserve',
+  'erice': 'Erice', 'trapani': 'Trapani', 'segesta': 'Segesta', 'selinunte': 'Selinunte',
+  'catania': 'Catania', 'etna': 'Mount Etna', 'alcantara': 'Gole dell\'Alcantara',
+  'taormina': 'Taormina', 'isola-bella': 'Isola Bella (Sicily)',
+  'syrakus': 'Syracuse, Sicily', 'noto': 'Noto, Sicily', 'modica': 'Modica',
+  'ragusa': 'Ragusa Ibla', 'agrigento': 'Valley of the Temples',
+  'scala-turchi': 'Scala dei Turchi', 'torre-salsa': 'Torre Salsa, Sicily',
+  'stromboli': 'Stromboli', 'vulcano': 'Vulcano', 'lipari': 'Lipari',
+  'mondello': 'Mondello', 'san-vito-s': 'San Vito Lo Capo', 'marzamemi': 'Marzamemi',
+  'letojanni': 'Letojanni', 'isola-bella-s': 'Isola Bella (Sicily)',
+  'calamosche': 'Calamosche', 'guidaloca': 'Scopello, Sicily',
+  'punta-bianca': 'Scala dei Turchi', 'marinello': 'Tindari',
+  'portopalo': 'Portopalo di Capo Passero', 'cala-rossa': 'Favignana'
+};
+
+const imageCache = new Map();
+
+async function fetchWikiImage(title) {
+  if (!title) return null;
+  if (imageCache.has(title)) return imageCache.get(title);
+  try {
+    const res = await fetch(
+      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`
+    );
+    const data = await res.json();
+    const img = data.thumbnail?.source?.replace(/\/\d+px-/, '/400px-') || null;
+    imageCache.set(title, img);
+    return img;
+  } catch {
+    imageCache.set(title, null);
+    return null;
+  }
+}
+
+async function preloadPlaceImages(trip) {
+  const places = trip.tours.flatMap(t => t.places);
+  for (const place of places) {
+    const title = WIKI_TITLES[place.id];
+    if (!title) continue;
+    fetchWikiImage(title).then(img => {
+      if (!img) return;
+      // Update sidebar card thumbnail
+      const thumb = document.getElementById('thumb-' + place.id);
+      if (thumb) { thumb.src = img; thumb.classList.add('loaded'); }
+    });
+    await new Promise(r => setTimeout(r, 80)); // polite rate limiting
+  }
+}
+
 // ── MAP ──
 const map = L.map('map', { center: [37.5, 14.2], zoom: 8, zoomControl: true });
 let currentTileLayer = null;
@@ -494,6 +551,7 @@ function openTrip(trip) {
   buildFilters(trip); buildPlaceList(trip, 'all'); buildMarkers(trip);
   map.flyTo(trip.center, trip.zoom, { duration: 1.2 });
   loadUserSpots(trip.id);
+  preloadPlaceImages(trip);
 }
 
 bcRoot.addEventListener('click', showTripList);
@@ -810,6 +868,7 @@ function makePlaceCard(place, tour) {
         <div class="card-desc">${place.desc}</div>
         ${place.tip ? `<div class="card-tips">💡 ${place.tip}</div>` : ''}
       </div>
+      <img class="card-thumb" id="thumb-${place.id}" alt="${place.name}">
     </div>`;
 
   card.querySelector('.card-plan-btn').addEventListener('click', e => {
@@ -841,7 +900,16 @@ function buildMarkers(trip) {
   trip.tours.forEach(tour => {
     tour.places.forEach(place => {
       const marker = L.marker([place.lat, place.lng], { icon: makeIcon(tour.color, tour.emoji) }).addTo(map);
-      marker.bindPopup(`<div class="popup-emoji">${place.emoji}</div><div class="popup-title">${place.name}</div><div class="popup-sub">${place.sub}</div><ul class="popup-highlights">${place.highlights.slice(0,4).map(h=>`<li>${h}</li>`).join('')}</ul>${place.tip?`<div class="popup-tip">💡 ${place.tip}</div>`:''}`);
+      marker.bindPopup(`<div class="popup-emoji">${place.emoji}</div><div class="popup-title">${place.name}</div><div class="popup-sub">${place.sub}</div><ul class="popup-highlights">${place.highlights.slice(0,4).map(h=>`<li>${h}</li>`).join('')}</ul>${place.tip?`<div class="popup-tip">💡 ${place.tip}</div>`:''}<img id="popup-img-${place.id}" class="popup-img" alt="${place.name}" style="display:none">`);
+      marker.on('popupopen', () => {
+        const wikiTitle = WIKI_TITLES[place.id];
+        if (!wikiTitle) return;
+        fetchWikiImage(wikiTitle).then(src => {
+          if (!src) return;
+          const el = document.getElementById('popup-img-' + place.id);
+          if (el) { el.src = src; el.style.display = 'block'; }
+        });
+      });
       marker.on('click', () => highlightCard(place.id, tour.color, marker, tour));
       markers[place.id] = { marker, tour };
     });
