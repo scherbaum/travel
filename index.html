@@ -253,6 +253,37 @@ body.planning .stop-badge.visible { display: flex; }
   #map-hint { display: none; }
   #tour-panel.open { max-height: 260px; }
 }
+
+/* ── GALLERY OVERLAY ── */
+#gallery-overlay { position: fixed; inset: 0; z-index: 2000; background: var(--bg); display: none; flex-direction: column; }
+#gallery-overlay.open { display: flex; }
+#gallery-header { padding: 14px 16px; background: var(--header-bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+#gallery-title { font-size: 0.9rem; font-weight: 700; flex: 1; }
+#gallery-close { background: none; border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px; cursor: pointer; font-size: 0.78rem; color: var(--text-muted); font-family: var(--font); transition: all var(--transition); }
+#gallery-close:hover { color: var(--text); }
+#gallery-grid { flex: 1; overflow-y: auto; padding: 12px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; scrollbar-width: thin; scrollbar-color: var(--scrollbar) transparent; }
+@media (max-width: 600px) { #gallery-grid { grid-template-columns: repeat(2, 1fr); } }
+.gallery-section-title { grid-column: 1/-1; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--text-muted); padding: 8px 0 6px; border-bottom: 1px solid var(--border); }
+.gallery-card { position: relative; border-radius: 10px; overflow: hidden; aspect-ratio: 3/4; cursor: pointer; border: 2.5px solid transparent; transition: all 0.18s; background: var(--card); }
+.gallery-card:hover { transform: scale(1.03); }
+.gallery-card.selected { border-color: var(--accent); }
+.gallery-card-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gallery-card-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 2rem; background: var(--card); }
+.gallery-card-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.78) 45%, transparent 75%); display: flex; flex-direction: column; justify-content: flex-end; padding: 10px 8px 8px; }
+.gallery-card-emoji { font-size: 1.05rem; margin-bottom: 2px; }
+.gallery-card-name { font-size: 0.73rem; font-weight: 600; color: #fff; line-height: 1.2; }
+.gallery-card-tour { font-size: 0.57rem; color: rgba(255,255,255,0.6); margin-top: 2px; }
+.gallery-card-check { position: absolute; top: 7px; right: 7px; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 0.7rem; display: none; align-items: center; justify-content: center; font-weight: 700; box-shadow: 0 1px 4px rgba(0,0,0,0.4); }
+.gallery-card.selected .gallery-card-check { display: flex; }
+#gallery-bar { padding: 12px 16px; background: var(--header-bg); border-top: 1px solid var(--border); display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+#gallery-count { flex: 1; font-size: 0.82rem; color: var(--text-muted); }
+#btn-gallery-plan { padding: 9px 20px; border-radius: 20px; border: none; background: var(--accent); color: #fff; font-size: 0.82rem; font-weight: 700; cursor: pointer; font-family: var(--font); transition: all 0.18s; }
+#btn-gallery-plan:disabled { opacity: 0.35; cursor: default; }
+#btn-gallery-plan:not(:disabled):hover { filter: brightness(1.12); }
+.gallery-btn { margin-left: 4px; padding: 4px 9px; border-radius: 20px; border: 1px solid var(--accent); background: transparent; color: var(--accent); cursor: pointer; font-size: 0.67rem; font-family: var(--font); transition: all var(--transition); white-space: nowrap; }
+.gallery-btn:hover { background: var(--accent); color: #fff; }
+#ai-result-banner { margin: 8px 10px 0; padding: 10px 12px; border-radius: var(--radius); background: var(--tip-bg); border: 1px solid var(--tip-border); font-size: 0.74rem; color: var(--tip-text); line-height: 1.55; flex-shrink: 0; display: none; }
+#ai-result-banner.visible { display: block; }
 </style>
 </head>
 <body>
@@ -272,6 +303,7 @@ body.planning .stop-badge.visible { display: flex; }
 
     <div id="trip-list"></div>
     <div id="filters" style="display:none"></div>
+    <div id="ai-result-banner"></div>
     <div id="place-list"></div>
 
     <!-- Tour plan panel -->
@@ -794,6 +826,12 @@ function buildFilters(trip) {
   planBtn.textContent = '📍 Tagestour';
   planBtn.addEventListener('click', () => setPlanningMode(!planningMode));
   filtersEl.appendChild(planBtn);
+
+  const galBtn = document.createElement('button');
+  galBtn.className = 'gallery-btn';
+  galBtn.textContent = '🖼 Galerie';
+  galBtn.addEventListener('click', () => openGallery(trip));
+  filtersEl.appendChild(galBtn);
 }
 
 function setTour(trip, tourId, clickedBtn) {
@@ -1045,8 +1083,119 @@ function renderUserSpots(spots) {
   placeListEl.appendChild(section);
 }
 
+// ── GALLERY & AI PLANNING ──
+const galleryOverlay = document.getElementById('gallery-overlay');
+const galleryGrid = document.getElementById('gallery-grid');
+const galleryCount = document.getElementById('gallery-count');
+const btnGalleryPlan = document.getElementById('btn-gallery-plan');
+const aiResultBanner = document.getElementById('ai-result-banner');
+let gallerySelected = new Set();
+
+document.getElementById('gallery-close').addEventListener('click', () => galleryOverlay.classList.remove('open'));
+
+function openGallery(trip) {
+  gallerySelected.clear();
+  galleryGrid.innerHTML = '';
+  trip.tours.forEach(tour => {
+    const heading = document.createElement('div');
+    heading.className = 'gallery-section-title';
+    heading.innerHTML = `<span style="color:${tour.color}">${tour.emoji} ${tour.name}</span>`;
+    galleryGrid.appendChild(heading);
+    tour.places.forEach(place => {
+      const card = document.createElement('div');
+      card.className = 'gallery-card';
+      card.dataset.id = place.id;
+      const wikiTitle = WIKI_TITLES[place.id];
+      card.innerHTML = `
+        ${wikiTitle
+          ? `<img class="gallery-card-img" alt="${place.name}" src="">`
+          : `<div class="gallery-card-placeholder">${place.emoji}</div>`}
+        <div class="gallery-card-overlay">
+          <div class="gallery-card-emoji">${place.emoji}</div>
+          <div class="gallery-card-name">${place.name}</div>
+          <div class="gallery-card-tour" style="color:${tour.color}">${tour.name}</div>
+        </div>
+        <div class="gallery-card-check">✓</div>`;
+      card.addEventListener('click', () => {
+        const id = place.id;
+        if (gallerySelected.has(id)) gallerySelected.delete(id);
+        else gallerySelected.add(id);
+        card.classList.toggle('selected', gallerySelected.has(id));
+        updateGalleryBar();
+      });
+      galleryGrid.appendChild(card);
+      if (wikiTitle) {
+        fetchWikiImage(wikiTitle).then(src => {
+          if (src) {
+            const img = card.querySelector('.gallery-card-img');
+            if (img) img.src = src;
+          }
+        });
+      }
+    });
+  });
+  updateGalleryBar();
+  galleryOverlay.classList.add('open');
+}
+
+function updateGalleryBar() {
+  const n = gallerySelected.size;
+  galleryCount.textContent = n === 0 ? 'Orte antippen um sie auszuwählen' : `${n} Ort${n !== 1 ? 'e' : ''} ausgewählt`;
+  btnGalleryPlan.disabled = n < 2;
+}
+
+btnGalleryPlan.addEventListener('click', async () => {
+  if (gallerySelected.size < 2) return;
+  const allPlaces = currentTrip.tours.flatMap(t => t.places.map(p => ({ ...p, _tour: t })));
+  const selected = [...gallerySelected].map(id => allPlaces.find(p => p.id === id)).filter(Boolean);
+
+  const orig = btnGalleryPlan.textContent;
+  btnGalleryPlan.textContent = '⏳ KI plant...';
+  btnGalleryPlan.disabled = true;
+
+  try {
+    const res = await fetch('/api/plan-tour', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ places: selected.map(p => ({ id: p.id, name: p.name, sub: p.sub, lat: p.lat, lng: p.lng, visitMin: p.visitMin })) }),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    const ordered = (data.order || selected.map((_, i) => i)).map(i => selected[i]).filter(Boolean);
+    tourPlan = ordered.map(p => ({ place: p, tour: p._tour }));
+    renderTourPanel(); updateCardBadges(); drawRouteOnMap();
+    setPlanningMode(true);
+
+    if (data.reasoning) {
+      aiResultBanner.innerHTML = `✨ <strong>KI-Empfehlung:</strong> ${data.reasoning}${data.tip ? `<br>💡 <em>${data.tip}</em>` : ''} <button onclick="this.parentElement.style.display='none'" style="float:right;background:none;border:none;cursor:pointer;color:inherit;font-size:1rem;line-height:1">×</button>`;
+      aiResultBanner.classList.add('visible');
+      aiResultBanner.style.display = 'block';
+    }
+    galleryOverlay.classList.remove('open');
+  } catch (e) {
+    alert('Fehler beim KI-Planen: ' + e.message);
+    btnGalleryPlan.disabled = false;
+  } finally {
+    btnGalleryPlan.textContent = orig;
+    if (gallerySelected.size >= 2) btnGalleryPlan.disabled = false;
+  }
+});
+
 // ── INIT ──
 openTrip(TRIPS[0]);
 </script>
+
+<div id="gallery-overlay">
+  <div id="gallery-header">
+    <div id="gallery-title">🖼 Alle Sehenswürdigkeiten</div>
+    <button id="gallery-close">× Schließen</button>
+  </div>
+  <div id="gallery-grid"></div>
+  <div id="gallery-bar">
+    <div id="gallery-count">Orte antippen um sie auszuwählen</div>
+    <button id="btn-gallery-plan" disabled>✨ KI-Tour planen</button>
+  </div>
+</div>
 </body>
 </html>

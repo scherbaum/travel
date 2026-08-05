@@ -1,6 +1,10 @@
-FROM nginx:alpine
-COPY index.html /usr/share/nginx/html/index.html
-COPY user-spots.json /usr/share/nginx/html/user-spots.json
-COPY images/ /usr/share/nginx/html/images/
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+FROM node:20-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm install --production
+COPY server.js .
+COPY index.html .
+COPY user-spots.json .
+COPY images/ ./images/
 EXPOSE 5000
+CMD ["node", "server.js"]
