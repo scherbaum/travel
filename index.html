@@ -132,6 +132,9 @@ html, body { height: 100%; font-family: var(--font); background: var(--bg); colo
 .filter-btn:hover { color: var(--text); }
 .filter-btn.active { color: #fff !important; border-color: transparent; font-weight: 600; }
 
+#collapse-all { padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; font-size: 0.67rem; font-family: var(--font); transition: all var(--transition); white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
+#collapse-all:hover { color: var(--text); border-color: var(--text-muted); }
+
 /* Plan mode button */
 #plan-toggle { margin-left: auto; padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; font-size: 0.67rem; font-family: var(--font); transition: all var(--transition); white-space: nowrap; }
 #plan-toggle:hover { color: var(--accent); border-color: var(--accent); }
@@ -143,7 +146,14 @@ html, body { height: 100%; font-family: var(--font); background: var(--bg); colo
 #place-list::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 4px; }
 
 .tour-section { margin-bottom: 6px; }
-.tour-header { display: flex; align-items: center; gap: 7px; padding: 8px 4px 4px; font-size: 0.63rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--text-muted); border-bottom: 1px solid var(--border); margin-bottom: 5px; }
+.tour-header { display: flex; align-items: center; gap: 7px; padding: 8px 4px 4px; font-size: 0.63rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--text-muted); border-bottom: 1px solid var(--border); margin-bottom: 5px; cursor: pointer; user-select: none; width: 100%; background: none; border-left: none; border-right: none; border-top: none; font-family: var(--font); text-align: left; transition: color var(--transition); }
+.tour-header:hover { color: var(--text); }
+.tour-header .th-name { flex: 1; }
+.tour-header .th-count { font-size: 0.6rem; letter-spacing: 0.04em; opacity: 0.8; font-variant-numeric: tabular-nums; }
+.tour-header .th-chev { display: flex; transition: transform var(--transition); }
+.tour-section.collapsed .th-chev { transform: rotate(-90deg); }
+.tour-section.collapsed .place-card,
+.tour-section.collapsed #spot-tag-filters { display: none; }
 .tour-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 
 .place-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px 10px 13px; margin-bottom: 5px; cursor: pointer; transition: background var(--transition), border-color var(--transition); border-left: 3px solid transparent; position: relative; }
@@ -1634,6 +1644,14 @@ function buildFilters(trip) {
     filtersEl.appendChild(btn);
   });
 
+  const collapseBtn = document.createElement('button');
+  collapseBtn.id = 'collapse-all';
+  collapseBtn.title = 'Alle Kategorien auf-/zuklappen';
+  collapseBtn.dataset.mode = 'collapse';
+  collapseBtn.innerHTML = `${icon('chevron-up')} Alle zuklappen`;
+  collapseBtn.addEventListener('click', () => setAllSections(collapseBtn.dataset.mode === 'collapse'));
+  filtersEl.appendChild(collapseBtn);
+
   const fireBtn = document.createElement('button');
   fireBtn.id = 'fire-toggle';
   fireBtn.title = 'Brandgefahr & aktive Wärmesignale (EFFIS/Copernicus)';
@@ -1687,20 +1705,81 @@ function setTour(trip, tourId, clickedBtn) {
   buildPlaceList(trip, tourId);
 }
 
+// ── KATEGORIEN AUF-/ZUKLAPPEN ──
+// Zustand pro Reise merken, damit die Auswahl einen Reload überlebt.
+const COLLAPSE_KEY = 'collapsedSections.v1';
+
+function collapsedSet() {
+  try { return new Set(JSON.parse(localStorage.getItem(COLLAPSE_KEY) || '{}')[currentTrip?.id] || []); }
+  catch { return new Set(); }
+}
+
+function isCollapsed(sectionId) {
+  return collapsedSet().has(sectionId);
+}
+
+function toggleSection(sectionEl, sectionId) {
+  const nowCollapsed = !sectionEl.classList.contains('collapsed');
+  sectionEl.classList.toggle('collapsed', nowCollapsed);
+  sectionEl.querySelector('.tour-header')?.setAttribute('aria-expanded', String(!nowCollapsed));
+
+  const set = collapsedSet();
+  if (nowCollapsed) set.add(sectionId); else set.delete(sectionId);
+  try {
+    const all = JSON.parse(localStorage.getItem(COLLAPSE_KEY) || '{}');
+    all[currentTrip.id] = [...set];
+    localStorage.setItem(COLLAPSE_KEY, JSON.stringify(all));
+  } catch {}
+  updateCollapseAllBtn();
+}
+
 // ── PLACE LIST ──
+function setAllSections(collapsed) {
+  const ids = [];
+  document.querySelectorAll('#place-list .tour-section').forEach(sec => {
+    sec.classList.toggle('collapsed', collapsed);
+    sec.querySelector('.tour-header')?.setAttribute('aria-expanded', String(!collapsed));
+    if (sec.dataset.sectionId) ids.push(sec.dataset.sectionId);
+  });
+  try {
+    const all = JSON.parse(localStorage.getItem(COLLAPSE_KEY) || '{}');
+    all[currentTrip.id] = collapsed ? ids : [];
+    localStorage.setItem(COLLAPSE_KEY, JSON.stringify(all));
+  } catch {}
+  updateCollapseAllBtn();
+}
+
+function updateCollapseAllBtn() {
+  const btn = document.getElementById('collapse-all');
+  if (!btn) return;
+  const secs = [...document.querySelectorAll('#place-list .tour-section')];
+  const allCollapsed = secs.length > 0 && secs.every(s => s.classList.contains('collapsed'));
+  btn.dataset.mode = allCollapsed ? 'expand' : 'collapse';
+  btn.innerHTML = allCollapsed
+    ? `${icon('chevron-down')} Alle aufklappen`
+    : `${icon('chevron-up')} Alle zuklappen`;
+}
+
 function buildPlaceList(trip, tourId) {
   placeListEl.innerHTML = '';
   const toShow = tourId === 'all' ? trip.tours : trip.tours.filter(t => t.id === tourId);
   toShow.forEach(tour => {
     const section = document.createElement('div');
-    section.className = 'tour-section';
-    section.innerHTML = `<div class="tour-header"><div class="tour-dot" style="background:${tour.color}"></div>${icon(tourIcon(tour.id))} ${tour.name}</div>`;
+    section.className = 'tour-section' + (isCollapsed(tour.id) ? ' collapsed' : '');
+    section.dataset.sectionId = tour.id;
+    section.innerHTML = `<button class="tour-header" type="button" aria-expanded="${!isCollapsed(tour.id)}">`
+      + `<div class="tour-dot" style="background:${tour.color}"></div>`
+      + `${icon(tourIcon(tour.id))}<span class="th-name">${tour.name}</span>`
+      + `<span class="th-count">${tour.places.length}</span>`
+      + `<span class="th-chev">${icon('chevron-down')}</span></button>`;
+    section.querySelector('.tour-header').addEventListener('click', () => toggleSection(section, tour.id));
     tour.places.forEach(place => {
       section.appendChild(makePlaceCard(place, tour));
     });
     placeListEl.appendChild(section);
   });
   applyFireChips();
+  updateCollapseAllBtn();
 }
 
 function makePlaceCard(place, tour) {
@@ -1803,7 +1882,6 @@ async function loadUserSpots(tripId) {
 
 function renderUserSpots(spots) {
   const section = document.createElement('div');
-  section.className = 'tour-section';
 
   // Collect all unique tags
   const allTags = [...new Set(spots.flatMap(s => s.tags || []))].sort();
@@ -1812,12 +1890,19 @@ function renderUserSpots(spots) {
   // Tag filter row (only if there are multiple tags)
   const tagFilterHtml = allTags.length > 1
     ? `<div id="spot-tag-filters" style="display:flex;flex-wrap:wrap;gap:4px;padding:4px 0 6px">
-        <button class="filter-btn active spot-tag-btn" data-tag="all" style="background:#E1306C;color:#fff;border-color:transparent;font-size:0.6rem">Alle</button>
-        ${allTags.map(t => `<button class="filter-btn spot-tag-btn" data-tag="${t}" style="color:#E1306C;border-color:#E1306C44;font-size:0.6rem">${t}</button>`).join('')}
+        <button class="filter-btn active spot-tag-btn" data-tag="all" style="background:var(--insta);color:var(--ink);border-color:transparent;font-size:0.6rem">Alle</button>
+        ${allTags.map(t => `<button class="filter-btn spot-tag-btn" data-tag="${esc(t)}" style="color:var(--insta);border-color:var(--border);font-size:0.6rem">${esc(t)}</button>`).join('')}
       </div>`
     : '';
 
-  section.innerHTML = `<div class="tour-header"><div class="tour-dot" style="background:var(--insta)"></div>${icon('camera')} Deine Fundstücke</div>${tagFilterHtml}`;
+  section.className = 'tour-section' + (isCollapsed('user-spots') ? ' collapsed' : '');
+  section.dataset.sectionId = 'user-spots';
+  section.innerHTML = `<button class="tour-header" type="button" aria-expanded="${!isCollapsed('user-spots')}">`
+    + `<div class="tour-dot" style="background:var(--insta)"></div>`
+    + `${icon('camera')}<span class="th-name">Deine Fundstücke</span>`
+    + `<span class="th-count">${spots.length}</span>`
+    + `<span class="th-chev">${icon('chevron-down')}</span></button>${tagFilterHtml}`;
+  section.querySelector('.tour-header').addEventListener('click', () => toggleSection(section, 'user-spots'));
 
   const instaMarkers = {}; // id → leaflet marker
 
@@ -1889,9 +1974,9 @@ function renderUserSpots(spots) {
     section.querySelectorAll('.spot-tag-btn').forEach(b => {
       const isActive = b.dataset.tag === tag;
       b.classList.toggle('active', isActive);
-      b.style.background = isActive ? '#E1306C' : 'transparent';
-      b.style.color = isActive ? '#fff' : '#E1306C';
-      b.style.borderColor = isActive ? 'transparent' : '#E1306C44';
+      b.style.background = isActive ? 'var(--insta)' : 'transparent';
+      b.style.color = isActive ? 'var(--ink)' : 'var(--insta)';
+      b.style.borderColor = isActive ? 'transparent' : 'var(--border)';
     });
     renderSpotCards(tag);
   }
