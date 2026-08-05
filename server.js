@@ -1,9 +1,15 @@
 import express from 'express';
+import compression from 'compression';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
+
+// index.html ist ~123 KB unkomprimiert — ohne gzip geht das bei jedem Aufruf
+// vollstaendig ueber die Leitung. (Die nginx.conf im Repo wird nicht benutzt,
+// das Image startet direkt server.js.)
+app.use(compression());
 app.use(express.json({ limit: '1mb' }));
 
 // Basic auth (activated when BASIC_AUTH_PASSWORD env var is set)
@@ -25,7 +31,14 @@ if (AUTH_PASS) {
   });
 }
 
-app.use(express.static(__dirname));
+// index.html nie cachen (sonst sieht man nach einem Deploy die alte Version),
+// Bilder dagegen lange.
+app.use(express.static(__dirname, {
+  setHeaders: (res, path) => {
+    if (path.endsWith('index.html')) res.setHeader('Cache-Control', 'no-cache');
+    else if (/\.(jpg|jpeg|png|webp|svg|ico)$/i.test(path)) res.setHeader('Cache-Control', 'public, max-age=604800');
+  },
+}));
 
 app.post('/api/plan-tour', async (req, res) => {
   const oauthToken = process.env.ANTHROPIC_OAUTH_TOKEN;
