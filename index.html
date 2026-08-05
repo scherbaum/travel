@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🇮🇹 Sizilien Reiseplaner</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg: #111;
+  --sidebar-bg: #181818;
+  --card-bg: #1f1f1f;
+  --card-hover: #272727;
+  --text: #f0ece3;
+  --muted: #777;
+  --accent: #d4a853;
+}
+html, body {
+  height: 100%;
+  font-family: 'Georgia', serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+}
+#app {
+  display: flex;
+  height: 100vh;
+}
+
+/* ── SIDEBAR ── */
+#sidebar {
+  width: 390px;
+  min-width: 390px;
+  background: var(--sidebar-bg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-right: 1px solid #2c2c2c;
+  z-index: 10;
+}
+#header {
+  padding: 18px 18px 14px;
+  background: linear-gradient(160deg, #1c1100 0%, #261800 100%);
+  border-bottom: 1px solid #2c2c2c;
+  flex-shrink: 0;
+}
+#header h1 {
+  font-size: 1.25rem;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
+}
+#header .subtitle {
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-style: italic;
+}
+#stats {
+  display: flex;
+  gap: 16px;
+  margin-top: 10px;
+}
+.stat {
+  text-align: center;
+  font-size: 0.68rem;
+  color: var(--muted);
+}
+.stat strong {
+  display: block;
+  font-size: 1.1rem;
+  color: var(--accent);
+  font-style: normal;
+}
+
+#filters {
+  padding: 10px 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  background: #141414;
+  border-bottom: 1px solid #242424;
+  flex-shrink: 0;
+}
+.filter-btn {
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid #333;
+  background: transparent;
+  color: #888;
+  cursor: pointer;
+  font-size: 0.68rem;
+  transition: all 0.18s;
+  font-family: inherit;
+  letter-spacing: 0.02em;
+}
+.filter-btn:hover { border-color: #555; color: #ccc; }
+.filter-btn.active {
+  color: #fff !important;
+  border-color: transparent;
+  font-weight: bold;
+}
+
+#place-list {
+  overflow-y: auto;
+  flex: 1;
+  padding: 8px 10px 16px;
+  scrollbar-width: thin;
+  scrollbar-color: #333 transparent;
+}
+#place-list::-webkit-scrollbar { width: 4px; }
+#place-list::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+
+.tour-section { margin-bottom: 8px; }
+.tour-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 6px 4px;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+  border-bottom: 1px solid #272727;
+  margin-bottom: 5px;
+}
+.tour-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.place-card {
+  background: var(--card-bg);
+  border-radius: 8px;
+  padding: 11px 12px 11px 13px;
+  margin-bottom: 5px;
+  cursor: pointer;
+  transition: all 0.18s;
+  border-left: 3px solid transparent;
+}
+.place-card:hover {
+  background: var(--card-hover);
+  transform: translateX(2px);
+}
+.place-card.active {
+  background: #232320;
+  box-shadow: 0 0 0 1px rgba(212,168,83,0.2);
+}
+.card-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+}
+.card-emoji {
+  font-size: 1.3rem;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 1px;
+  width: 28px;
+  text-align: center;
+}
+.card-body { flex: 1; min-width: 0; }
+.card-name {
+  font-size: 0.92rem;
+  font-weight: bold;
+  color: var(--text);
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.card-sub {
+  font-size: 0.7rem;
+  color: #888;
+  margin-bottom: 5px;
+  font-style: italic;
+}
+.card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-bottom: 5px;
+}
+.tag {
+  font-size: 0.6rem;
+  padding: 2px 5px;
+  border-radius: 8px;
+  background: #2a2a2a;
+  color: #999;
+  font-family: system-ui, sans-serif;
+  letter-spacing: 0.01em;
+}
+.card-desc {
+  font-size: 0.76rem;
+  color: #999;
+  line-height: 1.45;
+}
+.card-tips {
+  margin-top: 7px;
+  font-size: 0.7rem;
+  color: var(--accent);
+  opacity: 0.75;
+  font-style: italic;
+  border-top: 1px solid #2a2a2a;
+  padding-top: 6px;
+}
+
+/* ── MAP ── */
+#map-container {
+  flex: 1;
+  position: relative;
+  min-width: 0;
+}
+#map { width: 100%; height: 100%; }
+
+/* leaflet popup dark */
+.leaflet-popup-content-wrapper {
+  background: rgba(20,18,14,0.97) !important;
+  color: #f0ece3 !important;
+  border-radius: 10px !important;
+  border: 1px solid #3a3a3a !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.6) !important;
+}
+.leaflet-popup-tip { background: rgba(20,18,14,0.97) !important; }
+.leaflet-popup-content { margin: 14px 16px !important; }
+.popup-emoji { font-size: 1.6rem; margin-bottom: 6px; }
+.popup-title { font-size: 1rem; font-weight: bold; margin-bottom: 5px; color: #f0ece3; }
+.popup-sub { font-size: 0.72rem; color: #888; margin-bottom: 8px; font-style: italic; }
+.popup-highlights {
+  list-style: none;
+  font-size: 0.78rem;
+  color: #bbb;
+  line-height: 1.7;
+}
+.popup-highlights li::before { content: "✦ "; color: var(--accent); }
+.popup-tip {
+  margin-top: 8px;
+  padding: 7px 9px;
+  background: rgba(212,168,83,0.08);
+  border-radius: 6px;
+  font-size: 0.72rem;
+  color: #c49a42;
+  font-style: italic;
+  border-left: 2px solid #c49a42;
+}
+
+/* map attribution tweaks */
+.leaflet-control-attribution { font-size: 0.6rem; background: rgba(0,0,0,0.6) !important; color: #666 !important; }
+.leaflet-control-attribution a { color: #888 !important; }
+.leaflet-control-zoom a {
+  background: #1f1f1f !important;
+  color: #ccc !important;
+  border-color: #333 !important;
+}
+.leaflet-control-zoom a:hover { background: #2a2a2a !important; color: #fff !important; }
+
+/* map overlay title */
+#map-overlay {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 500;
+  background: rgba(17,17,17,0.88);
+  backdrop-filter: blur(8px);
+  border-radius: 10px;
+  padding: 10px 14px;
+  border: 1px solid #2c2c2c;
+  font-size: 0.72rem;
+  color: var(--muted);
+  max-width: 200px;
+  text-align: center;
+}
+#map-overlay strong { display: block; color: var(--accent); font-size: 0.85rem; margin-bottom: 2px; }
+
+/* mobile */
+@media (max-width: 700px) {
+  #app { flex-direction: column; }
+  #sidebar { width: 100%; min-width: unset; max-height: 50vh; }
+  #map-container { height: 50vh; flex: none; }
+  #map-overlay { display: none; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="sidebar">
+    <div id="header">
+      <h1>🇮🇹 Sizilien Reiseplaner</h1>
+      <div class="subtitle">Kuratierte Touren • Karte & Insider-Tipps</div>
+      <div id="stats">
+        <div class="stat"><strong id="stat-orte">26</strong>Orte</div>
+        <div class="stat"><strong id="stat-touren">6</strong>Touren</div>
+        <div class="stat"><strong>∞</strong>Erinnerungen</div>
+      </div>
+    </div>
+    <div id="filters">
+      <button class="filter-btn active" data-tour="all" style="background:#333;color:#fff;border-color:#555">Alle</button>
+    </div>
+    <div id="place-list"></div>
+  </div>
+
+  <div id="map-container">
+    <div id="map"></div>
+    <div id="map-overlay">
+      <strong>Klicke einen Ort</strong>
+      für Details &amp; Tipps
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const TOURS = [
+  {
+    id: 'nord',
+    name: 'Palermo & Nordküste',
+    emoji: '🏛️',
+    color: '#E07B69',
+    places: [
+      {
+        id: 'palermo',
+        name: 'Palermo',
+        sub: 'Siziliens pulsierende Hauptstadt',
+        emoji: '🏙️',
+        lat: 38.1157, lng: 13.3615,
+        tags: ['Stadt', 'Geschichte', 'Streetfood', 'Märkte'],
+        desc: 'Hauptstadt Siziliens mit jahrtausendealter Geschichte. Arabisch-normannische Architektur, lebhafte Märkte und das beste Streetfood der Insel.',
+        highlights: ['Palazzo dei Normanni & Cappella Palatina', 'Palermo Cathedral', 'Teatro Massimo (größte Oper Italiens)', 'Ballaro-Markt (Street-Food-Paradies)', 'Monreale Cathedral (10 km, Pflicht!)'],
+        tip: 'Streetfood: Arancina, Panelle, Sfincione — am besten am Ballaro-Markt'
+      },
+      {
+        id: 'monreale',
+        name: 'Monreale',
+        sub: 'Goldene Mosaike der Normannen',
+        emoji: '✨',
+        lat: 38.0820, lng: 13.2883,
+        tags: ['Kathedrale', 'Mosaike', 'UNESCO'],
+        desc: '6.340 m² Goldmosaike in der Normannenkathedrale. 2.200 kg reines Gold. Eine der eindrucksvollsten Kirchen der Welt — nur 10 km von Palermo.',
+        highlights: ['Dom von Monreale (unbedingt!)', 'Kreuzgang mit 228 Säulen', 'Panoramablick auf die Conca d\'Oro'],
+        tip: 'Früh morgens gehen, bevor die Tagestouren ankommen. Eintritt ~5 €'
+      },
+      {
+        id: 'cefalu',
+        name: 'Cefalù',
+        sub: 'Das Bilderbuch-Fischerdorf',
+        emoji: '🎨',
+        lat: 38.0397, lng: 14.0219,
+        tags: ['Strand', 'Altstadt', 'Kathedrale', 'Foto'],
+        desc: 'Cefalù ist eines der schönsten Bilder Siziliens: Farbige Häuser, normannische Kathedrale, enge Gassen. In der Hochsaison voll, trotzdem ein Muss.',
+        highlights: ['Normannische Kathedrale (1131)', 'Auf La Rocca klettern (Panorama!)', 'Alter Hafen & Pier', 'Altstadt bummeln', 'Sandstrand direkt am Zentrum'],
+        tip: 'La Rocca früh morgens oder abends — Aufstieg ca. 30 Min, atemberaubender Ausblick'
+      }
+    ]
+  },
+  {
+    id: 'west',
+    name: 'Westspitze',
+    emoji: '🌊',
+    color: '#D4A853',
+    places: [
+      {
+        id: 'san-vito',
+        name: 'San Vito Lo Capo',
+        sub: 'Schönster Strand Siziliens',
+        emoji: '🏖️',
+        lat: 38.1749, lng: 12.7333,
+        tags: ['Strand', 'Wasser', 'Couscous-Festival', 'Entspannung'],
+        desc: 'Türkisblaues glasklares Wasser, weißer Sandstrand — oft als schönster Strand Siziliens bezeichnet. Kleiner gepflegter Ferienort mit gutem Restaurant-Angebot.',
+        highlights: ['Langer Sandstrand mit türkisblauem Wasser', 'Pistaziencreme-Croissants in Panificio Plaia', 'Freitagsmarkt', 'Küstenstraße Richtung Zingaro'],
+        tip: 'Im September: Couscous Festival! Außerhalb der Hochsaison deutlich ruhiger'
+      },
+      {
+        id: 'zingaro',
+        name: 'Riserva Zingaro',
+        sub: 'Siziliens schönste Küstenwanderung',
+        emoji: '🥾',
+        lat: 38.1000, lng: 12.7667,
+        tags: ['Naturreservat', 'Wandern', 'Baden', 'Einsamkeit'],
+        desc: '7 km Küstenweg durch unberührte Natur, vorbei an 7 versteckten Badebuchten. Kein Motorverkehr, keine Gebäude — nur Klippen, Pinien und türkisblaues Meer.',
+        highlights: ['Cala Capreria (kristallklares Wasser)', 'Cala dell\'Uzzo', 'Küstenweg Süd→Nord oder umgekehrt', 'Wildblumen im Frühjahr spektakulär'],
+        tip: 'Eintritt: 5 € / Person. Wasser mitnehmen, es gibt keine Versorgung auf dem Weg. Beste Zeit: April–Juni'
+      },
+      {
+        id: 'erice',
+        name: 'Erice',
+        sub: 'Mittelalterliches Bergdorf im Nebel',
+        emoji: '🏔️',
+        lat: 37.9669, lng: 12.5853,
+        tags: ['Bergdorf', 'Mittelalter', 'Aussicht', 'Geback'],
+        desc: 'Mystisches Bergdorf auf 750 m — oft in Wolken gehüllt. Gepflasterte Gassen, normannische Burg, und die besten Süßigkeiten Siziliens (Maria Grammatico).',
+        highlights: ['Castello di Venere', 'Torrione Pepoli (Aussicht)', 'Konditorei Maria Grammatico', 'Mittelaltergassen im Nebel', 'Baumwollkekse (Mustazzoli)'],
+        tip: 'Mit der Seilbahn (Funivia) von Trapani hinauf. Morgens oft Nebel — dann besonders magisch'
+      },
+      {
+        id: 'trapani',
+        name: 'Trapani & Salinen',
+        sub: 'Salz, Windmühlen, Westküste',
+        emoji: '🌅',
+        lat: 38.0175, lng: 12.5365,
+        tags: ['Salinen', 'Sonnenuntergang', 'Marsala-Wein', 'Inseln'],
+        desc: 'Trapani ist Ausgangspunkt für Erice, Segesta und die Ägadischen Inseln. Die Salinen südlich mit Windmühlen bieten einen der schönsten Sonnenuntergänge Siziliens.',
+        highlights: ['Saline di Trapani (Sonnenuntergang!)', 'Windmühlen bei Stagnone', 'Altstadt von Trapani', 'Fähre zu den Ägadischen Inseln', 'Marsala (30 km): Wein & antike Schiffe'],
+        tip: 'Sonnenuntergang an den Salinen mit Blick auf die Windmühlen: Pflicht-Fotomotiv!'
+      },
+      {
+        id: 'segesta',
+        name: 'Segesta',
+        sub: 'Einsamer griechischer Tempel',
+        emoji: '🏛️',
+        lat: 37.9394, lng: 12.8344,
+        tags: ['Antike', 'Tempel', 'Theater', 'Archäologie'],
+        desc: 'Einer der besterhaltenen griechischen Tempel der Welt — und das mitten in einer einsamen Hügellandschaft. Dazu ein Theater mit Ausblick auf das Meer.',
+        highlights: ['Dorischer Tempel (unvollendet, 5. Jhd. v.Chr.)', 'Griechisches Theater (Blick aufs Meer)', 'Einsame Landschaft, wenig Touristen', 'Zum Theater mit dem Shuttlebus'],
+        tip: 'Weniger überlaufen als Agrigento. Bei Sonnenuntergang traumhaft beleuchtet'
+      },
+      {
+        id: 'selinunte',
+        name: 'Selinunte',
+        sub: 'Größter griechischer Tempelkomplex außerhalb Griechenlands',
+        emoji: '🗿',
+        lat: 37.5867, lng: 12.8267,
+        tags: ['Antike', 'Tempel', 'UNESCO', 'Archäologie'],
+        desc: 'Fünf Tempel, eine weitläufige archäologische Zone direkt am Meer. Selinunte war einst eine der größten griechischen Städte der Antike.',
+        highlights: ['Tempel E (Hera), größtenteils wiederaufgebaut', 'Tempel G (Gigantenstatue)', 'Akropolis der antiken Stadt', 'Weißsandstrand direkt daneben'],
+        tip: 'Kombination mit einem Strandtag am Selinunte-Strand perfekt. Frühmorgens kommen'
+      }
+    ]
+  },
+  {
+    id: 'etna',
+    name: 'Ätna & Ostküste',
+    emoji: '🌋',
+    color: '#F4845F',
+    places: [
+      {
+        id: 'catania',
+        name: 'Catania',
+        sub: 'Barocke Stadt unter dem Vulkan',
+        emoji: '🐘',
+        lat: 37.5023, lng: 15.0873,
+        tags: ['Stadt', 'Barock', 'Fischmarkt', 'Nachtleben'],
+        desc: 'Catania ist lebhafter als Palermo, authentischer als Taormina. Schwarze Lavastein-Architektur, ein riesiger Fischmarkt und das beste Granita-Frühstück Siziliens.',
+        highlights: ['La Pescheria (Fischmarkt, morgens)', 'Piazza del Duomo mit Elefantenbrunnen', 'Dom San Agata', 'Granita + Brioche zum Frühstück', 'Via Etnea – die Hauptstraße mit Ätna-Blick'],
+        tip: 'Granita-Frühstück mit Brioscia beim Caffè Sicilia oder Savia. Der Fischmarkt ist täglich morgens bis 13 Uhr'
+      },
+      {
+        id: 'etna',
+        name: 'Ätna',
+        sub: 'Europas aktivster Vulkan',
+        emoji: '🌋',
+        lat: 37.7510, lng: 15.0003,
+        tags: ['Vulkan', 'Wandern', 'Wein', 'Natur', 'Skifahren'],
+        desc: 'Der Ätna ist kein gewöhnlicher Vulkan — er ist ein Erlebnis. Weinberge an den Hängen, Lavafelder, Krater-Wanderungen und Etna-Wein gehören zu Sizilien wie der Strand.',
+        highlights: ['Wanderung zum Hauptkrater (mit Guide)', 'Etna Wein: Nerello Mascalese probieren', 'Lavahöhlen erkunden', 'Rifugio Sapienza als Ausgangspunkt', 'Seilbahn auf 2.500 m (Funivia dell\'Etna)'],
+        tip: 'Mit zertifiziertem Bergführer auf den Gipfel (3.357 m). Etna-Wein-Tour Boden der Welt: Benanti, Passopisciaro'
+      },
+      {
+        id: 'alcantara',
+        name: 'Alcantara-Schlucht',
+        sub: 'Basalt-Schlucht mit eiskaltem Fluss',
+        emoji: '🏞️',
+        lat: 37.8833, lng: 15.1667,
+        tags: ['Natur', 'Schwimmen', 'Schlucht', 'Basalt'],
+        desc: 'Basaltsäulen formen eine enge Schlucht, durch die der Eiskalte Fluss Alcantara fließt. Man kann durch die Schlucht waten — ein einzigartiges Erlebnis.',
+        highlights: ['Durch die Schlucht waten (Gummistiefel leihen)', 'Basaltformationen fotografieren', 'Ätna im Hintergrund', 'Wasserfall am Ende der Schlucht'],
+        tip: 'Wasser ist KALT (~10°C). Gummistiefel vor Ort leihen. Beste Zeit: Sommer morgens'
+      },
+      {
+        id: 'taormina',
+        name: 'Taormina',
+        sub: 'Die Perle Siziliens',
+        emoji: '💎',
+        lat: 37.8522, lng: 15.2891,
+        tags: ['Panorama', 'Theater', 'Strand', 'Luxus'],
+        desc: 'Taormina thront auf einem Felsen mit Blick auf Ätna und Meer. Das griechische Theater ist eine der beeindruckendsten antiken Stätten überhaupt.',
+        highlights: ['Griechisches Theater (3. Jhd. v.Chr.)', 'Blick auf Ätna + Meer vom Teatro', 'Piazza IX Aprile zum Sonnenuntergang', 'Isola Bella (Seilbahn runter)', 'Madonna della Rocca (300 Stufen, Panorama)'],
+        tip: 'Außerhalb der Hochsaison (Mai/Sept/Okt) viel schöner. Isola Bella früh morgens oder abends'
+      },
+      {
+        id: 'isola-bella',
+        name: 'Isola Bella',
+        sub: 'Das schöne Inselchen unter Taormina',
+        emoji: '🏝️',
+        lat: 37.8453, lng: 15.2986,
+        tags: ['Strand', 'Schwimmen', 'Natur', 'Schnorcheln'],
+        desc: 'Kleines Naturreservat direkt am Meer unter Taormina — durch eine schmale Sandbank verbunden. Türkisblaues Wasser, Schnorcheln, und der Taormina-Blick von unten.',
+        highlights: ['Sandbank zur Insel bei Ebbe begehbar', 'Schnorcheln rund um die Insel', 'Blick hinauf zu Taormina', 'Liegen & Schirme auf dem Strand'],
+        tip: 'Sehr voll im Juli/August. April/Mai oder September ist perfekt. Seilbahn von Taormina: 3 €'
+      }
+    ]
+  },
+  {
+    id: 'barock',
+    name: 'Barockes Dreieck',
+    emoji: '🏚️',
+    color: '#5BA5A0',
+    places: [
+      {
+        id: 'syrakus',
+        name: 'Syrakus & Ortygia',
+        sub: 'Antike Weltstadt, barocke Insel',
+        emoji: '🏛️',
+        lat: 37.0676, lng: 15.2930,
+        tags: ['Antike', 'Barock', 'Altstadt', 'Meer'],
+        desc: 'Syrakus war einst mächtiger als Athen. Die Insel Ortygia ist das historische Herz: Barocke Piazze, enge Gassen, Capoponenti-Markt, alles vom Meer umgeben.',
+        highlights: ['Ortygia: Piazza del Duomo (ein Wow)', 'Griechisches Theater (5. Jhd. v.Chr.)', 'Ohr des Dionysius (Grotte)', 'Neapolis-Archäologiepark', 'Fontana Aretusa', 'Frischfischmarkt auf Ortygia'],
+        tip: 'Mindestens 2 Tage einplanen. Abends auf der Ortygia: Aperitivo am Wasser'
+      },
+      {
+        id: 'noto',
+        name: 'Noto',
+        sub: 'Goldene Barockstadt',
+        emoji: '🌟',
+        lat: 36.8911, lng: 15.0678,
+        tags: ['Barock', 'UNESCO', 'Architektur', 'Honig'],
+        desc: 'Noto wurde nach dem Erdbeben 1693 komplett neu gebaut — einheitlicher Barock aus gelbem Kalkstein, der im Abendlicht golden leuchtet. UNESCO-Welterbe.',
+        highlights: ['Corso Vittorio Emanuele (abends beleuchtet)', 'Dom San Nicolò', 'Palazzo Ducezio', 'Caffè Sicilia: bestes Granita Siziliens', 'Balkon mit Putten am Palazzo Nicolaci'],
+        tip: 'Abends kommen, wenn das Licht die goldenen Fassaden anstrahlt. Frühjahrsfest mit Blumenmarais im Mai'
+      },
+      {
+        id: 'modica',
+        name: 'Modica',
+        sub: 'Stadt der Azteken-Schokolade',
+        emoji: '🍫',
+        lat: 36.8612, lng: 14.7598,
+        tags: ['Schokolade', 'Barock', 'UNESCO', 'Gastronomie'],
+        desc: 'Modica ist weltberühmt für seine Schokolade — hergestellt nach aztekischem Rezept (kalt, ohne Zucker). Die Barockstadt auf zwei Felsen ist atemberaubend.',
+        highlights: ['Schokoladen-Shopping: Bonajuto (älteste Konditorei Siziliens)', 'Dom San Giorgio (Barock auf Treppen)', 'Dom San Pietro', 'Altstadt auf zwei Ebenen', 'Corso Umberto I'],
+        tip: 'Schokoladen-Sorten: Zimt, Chili, Vanille, Pistazie. Unbedingt probieren!'
+      },
+      {
+        id: 'ragusa',
+        name: 'Ragusa Ibla',
+        sub: 'Barockstadt auf dem Hügel',
+        emoji: '🕍',
+        lat: 36.9286, lng: 14.7214,
+        tags: ['Barock', 'UNESCO', 'Ruhe', 'Architektur'],
+        desc: 'Ragusa besteht aus zwei Teilen: der modernen Oberstadt und dem mittelalterlichen Ragusa Ibla, das auf einem Felsen thront. Weniger touristisch als Noto, sehr authentisch.',
+        highlights: ['Ibla: Piazza del Duomo mit Dom San Giorgio', 'Giardino Ibleo (Stadtpark)', 'Balkonhäuser und verwinkelte Gassen', 'Blick auf das Valle del Ragusano', 'Abendessen im Ibla: sehr gut & günstig'],
+        tip: 'Inspector Montalbano wurde hier gedreht. "Vigata" = Ragusa Ibla im TV'
+      }
+    ]
+  },
+  {
+    id: 'sued',
+    name: 'Südküste & Tempel',
+    emoji: '🏟️',
+    color: '#9B72CF',
+    places: [
+      {
+        id: 'agrigento',
+        name: 'Agrigento – Valle dei Templi',
+        sub: 'Beste griechische Tempel außerhalb Griechenlands',
+        emoji: '🏺',
+        lat: 37.2889, lng: 13.5876,
+        tags: ['Antike', 'UNESCO', 'Tempel', 'Pflicht'],
+        desc: 'Das Tal der Tempel in Agrigento ist eines der beeindruckendsten archäologischen Ensembles der Welt. Sieben griechische Tempel auf einem Hügelzug — zum Teil bestens erhalten.',
+        highlights: ['Tempio della Concordia (am besten erhalten)', 'Tempio di Ercole', 'Tempel bei Sonnenuntergang (goldenes Licht!)', 'Museum Luigi Pirandello', 'Mandelbäume im Frühjahr (weißes Blüten-Wunder)'],
+        tip: 'Ticket für Sonnenuntergang kaufen — Tempel im Abendlicht ist ein absolutes Highlight. Im Februar: Mandelbaumblüte!'
+      },
+      {
+        id: 'scala-turchi',
+        name: 'Scala dei Turchi',
+        sub: 'Weiße Felsen wie auf dem Mars',
+        emoji: '⬜',
+        lat: 37.2875, lng: 13.4653,
+        tags: ['Natur', 'Strand', 'Felsen', 'Foto'],
+        desc: 'Weiße Kalksteinstufen fallen steil ins Meer — eine surreale, mondhafte Landschaft. Oft als schönstes Naturfoto Siziliens bezeichnet.',
+        highlights: ['Weiße Felsenstufen hinaufklettern', 'Türkisblaues Wasser zu Füßen', 'Strand links und rechts der Felsen', 'Sonnenuntergang hier: legendär'],
+        tip: 'Parken 1 km entfernt, dann zu Fuß. Sehr beliebt — früh morgens oder Abend besuchen'
+      },
+      {
+        id: 'torre-salsa',
+        name: 'Torre Salsa',
+        sub: 'Unberührte Wildküste',
+        emoji: '🌿',
+        lat: 37.3514, lng: 13.3489,
+        tags: ['Naturreservat', 'Wildstrand', 'Einsamkeit', 'Wandern'],
+        desc: 'WWF-Naturreservat mit 5 km unberührter Küste, weißen Sanddünen, alten Türmen und kaum Touristen. Hier fühlt sich Sizilien wie vor 50 Jahren an.',
+        highlights: ['Kilometerweiter Wildstrand', 'Sanddünen und Maccchia-Natur', 'Meeresschildkröten nisten hier', 'Wanderwege entlang der Klippen', 'Normannischer Wachturm'],
+        tip: 'Kein Schatten am Strand → eigenen Schirm mitbringen. Eintritt frei'
+      }
+    ]
+  },
+  {
+    id: 'inseln',
+    name: 'Liparische Inseln',
+    emoji: '🏝️',
+    color: '#4A90D9',
+    places: [
+      {
+        id: 'stromboli',
+        name: 'Stromboli',
+        sub: 'Der ewige Leuchtturm des Mittelmeers',
+        emoji: '🌋',
+        lat: 38.7892, lng: 15.2131,
+        tags: ['Vulkan', 'Nachttour', 'Wandern', 'Spektakel'],
+        desc: 'Stromboli ist der aktivste Vulkan Europas — und spuckt alle 15–20 Minuten Lava! Nachtwanderungen zum Gipfel mit Guide sind ein unvergessliches Erlebnis.',
+        highlights: ['Nachttour zum Gipfel (mit Pflicht-Guide)', 'Sciara del Fuoco: Lava ins Meer', 'Strände aus schwarzem Sand', 'Idryuso: weißes Bergdorf', 'Kleine Kirche San Vincenzo'],
+        tip: 'Fähre ab Milazzo (2,5 Std.) oder per Helikopter. Guide für Gipfeltour ab 25 € / Person'
+      },
+      {
+        id: 'vulcano',
+        name: 'Vulcano',
+        sub: 'Schlammbad & Fumarolen',
+        emoji: '♨️',
+        lat: 38.4044, lng: 14.9619,
+        tags: ['Wellness', 'Schlammbad', 'Fumarolen', 'Baden'],
+        desc: 'Die Insel der heißen Quellen und Schlammbäder. Schwefeldämpfe, warme Meeresquellen — natürliches Wellness. Dazu ein Vulkankrater zum Wandern.',
+        highlights: ['Fango (Schlammbad) — kostenlos!', 'Acque Calde: warmes Meerwasser', 'Wanderung zum Gran Cratere', 'Schwarzsandstrand Sabbie Nere', 'Schnorcheln in klarem Wasser'],
+        tip: 'Kleider werden gelb vom Schwefel → alte Klamotten anziehen. Fango-Geruch bleibt im Stoff!'
+      },
+      {
+        id: 'lipari',
+        name: 'Lipari',
+        sub: 'Größte und vielseitigste Liparische Insel',
+        emoji: '🗺️',
+        lat: 38.4676, lng: 14.9542,
+        tags: ['Insel', 'Strand', 'Museum', 'Basis'],
+        desc: 'Lipari ist die Hauptinsel des Archipels und perfekte Basis. Klares Wasser, weiße Klippen aus Obsidian, ein archäologisches Museum und lebhaftes Zentrum.',
+        highlights: ['Castello di Lipari (Museum + Aussicht)', 'Bianca della Lava (weißer Obsidianklippen)', 'Spiaggia Valle Muria', 'Bootsrundfahrt um die Insel', 'Abendessen im Zentrum'],
+        tip: 'Vespa oder Motorroller mieten — beste Art die Insel zu erkunden. Tagesausflüge nach Vulcano & Stromboli von hier'
+      }
+    ]
+  }
+];
+
+// ── LEAFLET MAP ──
+const map = L.map('map', {
+  center: [37.5, 14.2],
+  zoom: 8,
+  zoomControl: true,
+  attributionControl: true
+});
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution: '© <a href="https://carto.com/">CARTO</a> © <a href="https://www.openstreetmap.org/copyright">OSM</a>',
+  subdomains: 'abcd',
+  maxZoom: 19
+}).addTo(map);
+
+// marker icon per tour
+function makeIcon(tour, active = false) {
+  return L.divIcon({
+    className: '',
+    html: `<div style="
+      width: ${active ? 38 : 32}px;
+      height: ${active ? 38 : 32}px;
+      background: ${tour.color};
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg);
+      border: 2px solid rgba(255,255,255,0.3);
+      box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+      transition: all 0.2s;
+    "><div style="
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform: rotate(45deg);
+      font-size: ${active ? '16px' : '13px'};
+    ">${tour.emoji}</div></div>`,
+    iconSize: [active ? 38 : 32, active ? 38 : 32],
+    iconAnchor: [active ? 19 : 16, active ? 38 : 32]
+  });
+}
+
+// Build markers
+const markers = {};
+let activeCard = null;
+
+TOURS.forEach(tour => {
+  tour.places.forEach(place => {
+    const marker = L.marker([place.lat, place.lng], {
+      icon: makeIcon(tour)
+    }).addTo(map);
+
+    marker.bindPopup(`
+      <div class="popup-emoji">${place.emoji}</div>
+      <div class="popup-title">${place.name}</div>
+      <div class="popup-sub">${place.sub}</div>
+      <ul class="popup-highlights">
+        ${place.highlights.slice(0, 4).map(h => `<li>${h}</li>`).join('')}
+      </ul>
+      ${place.tip ? `<div class="popup-tip">💡 ${place.tip}</div>` : ''}
+    `, {
+      maxWidth: 280,
+      className: 'dark-popup'
+    });
+
+    marker.on('click', () => {
+      highlightCard(place.id, tour, marker);
+    });
+
+    markers[place.id] = { marker, tour };
+  });
+});
+
+function highlightCard(placeId, tour, marker) {
+  // reset previous
+  if (activeCard) {
+    const el = document.getElementById('card-' + activeCard.id);
+    if (el) el.classList.remove('active');
+    const prev = markers[activeCard.id];
+    if (prev) prev.marker.setIcon(makeIcon(prev.tour));
+  }
+
+  // activate new
+  const card = document.getElementById('card-' + placeId);
+  if (card) {
+    card.classList.add('active');
+    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  marker.setIcon(makeIcon(tour, true));
+  activeCard = { id: placeId };
+}
+
+// ── BUILD SIDEBAR ──
+const filterDiv = document.getElementById('filters');
+const listDiv = document.getElementById('place-list');
+
+let activeTour = 'all';
+
+function renderList() {
+  listDiv.innerHTML = '';
+  const toShow = activeTour === 'all' ? TOURS : TOURS.filter(t => t.id === activeTour);
+
+  toShow.forEach(tour => {
+    const section = document.createElement('div');
+    section.className = 'tour-section';
+
+    section.innerHTML = `
+      <div class="tour-header">
+        <div class="tour-dot" style="background: ${tour.color}"></div>
+        ${tour.emoji} ${tour.name}
+      </div>
+    `;
+
+    tour.places.forEach(place => {
+      const card = document.createElement('div');
+      card.className = 'place-card';
+      card.id = 'card-' + place.id;
+      card.style.borderLeftColor = tour.color;
+      card.innerHTML = `
+        <div class="card-top">
+          <div class="card-emoji">${place.emoji}</div>
+          <div class="card-body">
+            <div class="card-name">${place.name}</div>
+            <div class="card-sub">${place.sub}</div>
+            <div class="card-tags">${place.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+            <div class="card-desc">${place.desc}</div>
+            ${place.tip ? `<div class="card-tips">💡 ${place.tip}</div>` : ''}
+          </div>
+        </div>
+      `;
+
+      card.addEventListener('click', () => {
+        const m = markers[place.id];
+        if (m) {
+          map.flyTo([place.lat, place.lng], 13, { duration: 1.2 });
+          setTimeout(() => m.marker.openPopup(), 1200);
+          highlightCard(place.id, tour, m.marker);
+        }
+      });
+
+      section.appendChild(card);
+    });
+
+    listDiv.appendChild(section);
+  });
+}
+
+// filter buttons
+TOURS.forEach(tour => {
+  const btn = document.createElement('button');
+  btn.className = 'filter-btn';
+  btn.dataset.tour = tour.id;
+  btn.style.color = tour.color;
+  btn.style.borderColor = tour.color + '44';
+  btn.innerHTML = `${tour.emoji} ${tour.name.split(' ')[0]}`;
+  btn.addEventListener('click', () => {
+    activeTour = tour.id;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    btn.style.background = tour.color;
+    btn.style.color = '#fff';
+
+    // show only those markers
+    TOURS.forEach(t => {
+      t.places.forEach(p => {
+        const m = markers[p.id];
+        if (m) {
+          if (activeTour === 'all' || t.id === activeTour) {
+            m.marker.addTo(map);
+          } else {
+            map.removeLayer(m.marker);
+          }
+        }
+      });
+    });
+
+    // fly to tour centroid
+    if (activeTour !== 'all') {
+      const tourObj = TOURS.find(t => t.id === activeTour);
+      const lats = tourObj.places.map(p => p.lat);
+      const lngs = tourObj.places.map(p => p.lng);
+      const centerLat = lats.reduce((a, b) => a + b) / lats.length;
+      const centerLng = lngs.reduce((a, b) => a + b) / lngs.length;
+      map.flyTo([centerLat, centerLng], 11, { duration: 1 });
+    } else {
+      map.flyTo([37.5, 14.2], 8, { duration: 1 });
+    }
+
+    renderList();
+  });
+  filterDiv.appendChild(btn);
+});
+
+// "Alle" button click
+document.querySelector('[data-tour="all"]').addEventListener('click', () => {
+  activeTour = 'all';
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.classList.remove('active');
+    const tour = TOURS.find(t => t.id === b.dataset.tour);
+    if (tour) { b.style.background = 'transparent'; b.style.color = tour.color; }
+  });
+  const allBtn = document.querySelector('[data-tour="all"]');
+  allBtn.classList.add('active');
+  allBtn.style.background = '#333';
+  allBtn.style.color = '#fff';
+
+  // show all markers
+  TOURS.forEach(t => t.places.forEach(p => {
+    const m = markers[p.id];
+    if (m) m.marker.addTo(map);
+  }));
+
+  map.flyTo([37.5, 14.2], 8, { duration: 1 });
+  renderList();
+});
+
+// update stats
+document.getElementById('stat-orte').textContent = TOURS.reduce((a, t) => a + t.places.length, 0);
+document.getElementById('stat-touren').textContent = TOURS.length;
+
+renderList();
+</script>
+</body>
+</html>
