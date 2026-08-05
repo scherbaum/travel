@@ -855,33 +855,104 @@ async function loadUserSpots(tripId) {
 function renderUserSpots(spots) {
   const section = document.createElement('div');
   section.className = 'tour-section';
-  section.innerHTML = `<div class="tour-header"><div class="tour-dot" style="background:#E1306C"></div>📸 Deine Fundstücke</div>`;
-  spots.forEach(spot => {
-    const card = document.createElement('div');
-    card.className = 'place-card';
-    card.id = 'spot-' + spot.id;
-    card.dataset.placeId = 'spot-' + spot.id;
-    card.style.borderLeftColor = '#E1306C';
-    const img = spot.image ? `<img src="${spot.image}" class="insta-thumb" alt="">` : `<div class="insta-thumb-placeholder">📸</div>`;
-    const locBadge = spot.lat && spot.lng
-      ? `<span style="font-size:0.6rem;color:#E1306C;margin-left:4px">📍 auf Karte</span>`
-      : `<span style="font-size:0.6rem;color:var(--text-muted);margin-left:4px">kein Standort</span>`;
-    card.innerHTML = `<div class="insta-card">${img}<div class="insta-body"><div class="card-name" style="font-size:0.85rem">${spot.name}${locBadge}</div><div class="insta-user">@${spot.username}</div><div class="card-tags">${(spot.tags||[]).map(t=>`<span class="tag">${t}</span>`).join('')}</div><div class="card-desc" style="font-size:0.72rem">${spot.desc}</div><a href="${spot.source_url}" target="_blank" class="insta-link">→ Instagram</a></div></div>`;
-    if (spot.lat && spot.lng) {
-      const instaIcon = L.divIcon({
-        className: '',
-        html: `<div style="width:32px;height:32px;background:#E1306C;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid rgba(255,255,255,0.3);box-shadow:0 3px 10px rgba(225,48,108,0.5)"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transform:rotate(45deg);font-size:14px">📸</div></div>`,
-        iconSize: [32, 32], iconAnchor: [16, 32]
+
+  // Collect all unique tags
+  const allTags = [...new Set(spots.flatMap(s => s.tags || []))].sort();
+  let activeSpotTag = null;
+
+  // Tag filter row (only if there are multiple tags)
+  const tagFilterHtml = allTags.length > 1
+    ? `<div id="spot-tag-filters" style="display:flex;flex-wrap:wrap;gap:4px;padding:4px 0 6px">
+        <button class="filter-btn active spot-tag-btn" data-tag="all" style="background:#E1306C;color:#fff;border-color:transparent;font-size:0.6rem">Alle</button>
+        ${allTags.map(t => `<button class="filter-btn spot-tag-btn" data-tag="${t}" style="color:#E1306C;border-color:#E1306C44;font-size:0.6rem">${t}</button>`).join('')}
+      </div>`
+    : '';
+
+  section.innerHTML = `<div class="tour-header"><div class="tour-dot" style="background:#E1306C"></div>📸 Deine Fundstücke</div>${tagFilterHtml}`;
+
+  const instaMarkers = {}; // id → leaflet marker
+
+  function renderSpotCards(filterTag) {
+    section.querySelectorAll('.place-card[id^="spot-"]').forEach(el => el.remove());
+    const toShow = filterTag && filterTag !== 'all'
+      ? spots.filter(s => (s.tags || []).includes(filterTag))
+      : spots;
+
+    toShow.forEach(spot => {
+      const card = document.createElement('div');
+      card.className = 'place-card';
+      card.id = 'spot-' + spot.id;
+      card.dataset.placeId = 'spot-' + spot.id;
+      card.style.borderLeftColor = '#E1306C';
+      const img = spot.image
+        ? `<img src="${spot.image}" class="insta-thumb" alt="">`
+        : `<div class="insta-thumb-placeholder">📸</div>`;
+      const locBadge = spot.lat && spot.lng
+        ? `<span style="font-size:0.6rem;color:#E1306C;margin-left:4px">📍 auf Karte</span>`
+        : `<span style="font-size:0.6rem;color:var(--text-muted);margin-left:4px">kein Standort</span>`;
+      card.innerHTML = `<div class="insta-card">${img}<div class="insta-body">
+        <div class="card-name" style="font-size:0.85rem">${spot.name}${locBadge}</div>
+        <div class="insta-user">@${spot.username}</div>
+        <div class="card-tags">${(spot.tags||[]).map(t=>`<span class="tag" style="cursor:pointer" data-filter-tag="${t}">${t}</span>`).join('')}</div>
+        <div class="card-desc" style="font-size:0.72rem">${spot.desc}</div>
+        <a href="${spot.source_url}" target="_blank" class="insta-link">→ Instagram</a>
+      </div></div>`;
+
+      // Click on tag chip → filter by that tag
+      card.querySelectorAll('.tag[data-filter-tag]').forEach(chip => {
+        chip.addEventListener('click', e => {
+          e.stopPropagation();
+          setSpotTag(chip.dataset.filterTag);
+        });
       });
-      const m = L.marker([spot.lat, spot.lng], { icon: instaIcon }).addTo(map);
-      m.bindPopup(`<div class="popup-emoji">📸</div><div class="popup-title">${spot.name}</div><div class="popup-sub">@${spot.username}</div>${spot.image ? `<img src="${spot.image}" style="width:100%;border-radius:6px;margin-top:6px;max-height:120px;object-fit:cover" alt="">` : ''}`);
-      card.addEventListener('click', () => {
-        map.flyTo([spot.lat, spot.lng], 14, { duration: 1.2 });
-        setTimeout(() => m.openPopup(), 1200);
-      });
-    }
-    section.appendChild(card);
+
+      if (spot.lat && spot.lng) {
+        // Add map marker if not yet added
+        if (!instaMarkers[spot.id]) {
+          const instaIcon = L.divIcon({
+            className: '',
+            html: `<div style="width:32px;height:32px;background:#E1306C;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid rgba(255,255,255,0.3);box-shadow:0 3px 10px rgba(225,48,108,0.5)"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transform:rotate(45deg);font-size:14px">📸</div></div>`,
+            iconSize: [32, 32], iconAnchor: [16, 32]
+          });
+          const m = L.marker([spot.lat, spot.lng], { icon: instaIcon }).addTo(map);
+          m.bindPopup(`<div class="popup-emoji">📸</div><div class="popup-title">${spot.name}</div><div class="popup-sub">@${spot.username}</div>${spot.image ? `<img src="${spot.image}" style="width:100%;border-radius:6px;margin-top:6px;max-height:120px;object-fit:cover" alt="">` : ''}`);
+          instaMarkers[spot.id] = m;
+        }
+        card.addEventListener('click', () => {
+          map.flyTo([spot.lat, spot.lng], 14, { duration: 1.2 });
+          setTimeout(() => instaMarkers[spot.id].openPopup(), 1200);
+        });
+      }
+      section.appendChild(card);
+    });
+
+    // Show/hide markers based on filter
+    spots.forEach(spot => {
+      if (!instaMarkers[spot.id]) return;
+      const visible = !filterTag || filterTag === 'all' || (spot.tags||[]).includes(filterTag);
+      if (visible) instaMarkers[spot.id].addTo(map);
+      else map.removeLayer(instaMarkers[spot.id]);
+    });
+  }
+
+  function setSpotTag(tag) {
+    activeSpotTag = tag;
+    section.querySelectorAll('.spot-tag-btn').forEach(b => {
+      const isActive = b.dataset.tag === tag;
+      b.classList.toggle('active', isActive);
+      b.style.background = isActive ? '#E1306C' : 'transparent';
+      b.style.color = isActive ? '#fff' : '#E1306C';
+      b.style.borderColor = isActive ? 'transparent' : '#E1306C44';
+    });
+    renderSpotCards(tag);
+  }
+
+  // Wire tag filter buttons
+  section.querySelectorAll('.spot-tag-btn').forEach(btn => {
+    btn.addEventListener('click', () => setSpotTag(btn.dataset.tag));
   });
+
+  renderSpotCards(null);
   placeListEl.appendChild(section);
 }
 
