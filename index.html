@@ -847,6 +847,72 @@ document.getElementById('stat-orte').textContent = TOURS.reduce((a, t) => a + t.
 document.getElementById('stat-touren').textContent = TOURS.length;
 
 renderList();
+
+// ── USER SPOTS (Instagram) ──
+const INSTA_COLOR = '#E1306C';
+
+async function loadUserSpots() {
+  try {
+    const res = await fetch('/user-spots.json?v=' + Date.now());
+    if (!res.ok) return;
+    const spots = await res.json();
+    if (!spots || spots.length === 0) return;
+    renderUserSpots(spots);
+  } catch (e) { /* no spots file → silent */ }
+}
+
+function renderUserSpots(spots) {
+  const section = document.createElement('div');
+  section.className = 'tour-section';
+  section.innerHTML = `
+    <div class="tour-header">
+      <div class="tour-dot" style="background: ${INSTA_COLOR}"></div>
+      📸 Deine Fundstücke
+    </div>
+  `;
+
+  spots.forEach(spot => {
+    const card = document.createElement('div');
+    card.className = 'place-card';
+    card.id = 'spot-' + spot.id;
+    card.style.borderLeftColor = INSTA_COLOR;
+
+    card.innerHTML = `
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        ${spot.image ? `<img src="${spot.image}" alt="" style="width:60px;height:60px;object-fit:cover;border-radius:6px;flex-shrink:0;border:1px solid #333">` : '<div style="width:60px;height:60px;background:#222;border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.5rem">📸</div>'}
+        <div style="flex:1;min-width:0">
+          <div class="card-name" style="font-size:0.85rem">${spot.name}</div>
+          <div style="font-size:0.66rem;color:${INSTA_COLOR};margin-bottom:4px">@${spot.username}</div>
+          <div class="card-tags">${(spot.tags||[]).map(t => `<span class="tag">${t}</span>`).join('')}</div>
+          <div class="card-desc" style="font-size:0.74rem">${spot.desc}</div>
+        </div>
+      </div>
+      <a href="${spot.source_url}" target="_blank" style="display:inline-block;margin-top:8px;font-size:0.65rem;color:${INSTA_COLOR};text-decoration:none;opacity:0.8">→ Instagram ansehen</a>
+    `;
+
+    if (spot.lat && spot.lng) {
+      const instaMarker = L.marker([spot.lat, spot.lng], {
+        icon: L.divIcon({
+          className: '',
+          html: `<div style="width:28px;height:28px;background:${INSTA_COLOR};border-radius:50%;border:2px solid rgba(255,255,255,0.4);display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 8px rgba(0,0,0,0.5)">📸</div>`,
+          iconSize: [28, 28],
+          iconAnchor: [14, 14]
+        })
+      }).addTo(map).bindPopup(`<div class="popup-emoji">📸</div><div class="popup-title">${spot.name}</div><div class="popup-sub">@${spot.username}</div><div class="popup-desc" style="font-size:0.78rem;color:#aaa;margin-top:6px">${spot.desc}</div>`);
+
+      card.addEventListener('click', () => {
+        map.flyTo([spot.lat, spot.lng], 14, { duration: 1.2 });
+        setTimeout(() => instaMarker.openPopup(), 1200);
+      });
+    }
+
+    section.appendChild(card);
+  });
+
+  document.getElementById('place-list').appendChild(section);
+}
+
+loadUserSpots();
 </script>
 </body>
 </html>
