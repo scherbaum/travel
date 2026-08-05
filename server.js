@@ -28,8 +28,11 @@ if (AUTH_PASS) {
 app.use(express.static(__dirname));
 
 app.post('/api/plan-tour', async (req, res) => {
+  const oauthToken = process.env.ANTHROPIC_OAUTH_TOKEN;
   const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) return res.status(503).json({ error: 'ANTHROPIC_API_KEY not configured on server' });
+  if (!oauthToken && !apiKey) return res.status(503).json({ error: 'No Claude credentials configured on server' });
+  const authHeader = oauthToken ? `Bearer ${oauthToken}` : null;
+  const apiKeyHeader = apiKey && !oauthToken ? apiKey : null;
 
   const { places } = req.body || {};
   if (!Array.isArray(places) || places.length < 2)
@@ -42,13 +45,16 @@ app.post('/api/plan-tour', async (req, res) => {
   const prompt = `Du bist Sizilien-Reiseexpertin. Die Nutzerin hat ${places.length} Orte ausgewählt:\n\n${list}\n\nPlane die geografisch und zeitlich optimale Tagestour. Bedenke:\n- Minimiere Fahrtstrecken durch sinnvolle Reihenfolge\n- Sehenswürdigkeiten lieber morgens, Strände mittags/nachmittags\n- Realistische Reise-Einschätzung für Sizilien (kurvenreiche Straßen)\n\nAntworte NUR mit gültigem JSON, kein Text davor oder danach:\n{"order":[0,2,1,...],"reasoning":"Warum diese Reihenfolge (2-3 Sätze auf Deutsch)","tip":"Ein konkreter Insidertipp für diese Kombination"}`;
 
   try {
+    const headers = {
+      'anthropic-version': '2023-06-01',
+      'content-type': 'application/json',
+    };
+    if (authHeader) headers['Authorization'] = authHeader;
+    if (apiKeyHeader) headers['x-api-key'] = apiKeyHeader;
+
     const r = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-      },
+      headers,
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 512,
