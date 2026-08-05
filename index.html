@@ -559,7 +559,6 @@ const placeListEl = document.getElementById('place-list');
 const bcRoot = document.getElementById('bc-root');
 const bcSep = document.getElementById('bc-sep');
 const bcTrip = document.getElementById('bc-trip');
-const planToggleBtn = document.getElementById('plan-toggle');
 const tourPanel = document.getElementById('tour-panel');
 
 function showTripList() {
@@ -601,13 +600,14 @@ function openTrip(trip) {
 bcRoot.addEventListener('click', showTripList);
 
 // ── PLANNING MODE ──
-planToggleBtn.addEventListener('click', () => setPlanningMode(!planningMode));
-
 function setPlanningMode(on) {
   planningMode = on;
   document.body.classList.toggle('planning', on);
-  planToggleBtn.classList.toggle('active', on);
-  planToggleBtn.textContent = on ? '✕ Fertig' : '📍 Tagestour';
+  const planToggleBtn = document.getElementById('plan-toggle');
+  if (planToggleBtn) {
+    planToggleBtn.classList.toggle('active', on);
+    planToggleBtn.textContent = on ? '✕ Fertig' : '📍 Tagestour';
+  }
   if (on) {
     tourPanel.classList.add('open');
     renderTourPanel();
