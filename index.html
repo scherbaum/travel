@@ -4,7 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Meine Reisen</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H"
+      crossorigin="anonymous"/>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -14,60 +16,83 @@
   --transition: 0.18s ease;
 }
 
+/* ── TRAIXON Farbkonzept (palette_19) ──
+   Akzente im OKLCH-Raum balanciert (sat 80, lig -3).
+   Ein Akzent-Set für Light & Dark, Neutrals pro Theme. */
+:root {
+  /* Akzent-Spektrum */
+  --c-rose:    #E18FA6;  --c-rose-deep:    #955B6B;
+  --c-coral:   #EC9E80;  --c-coral-deep:   #965F49;
+  --c-orange:  #ECB075;  --c-orange-deep:  #8E653B;
+  --c-yellow:  #E6D584;  --c-yellow-deep:  #7B6F36;
+  --c-lime:    #C2D587;  --c-lime-deep:    #69763F;
+  --c-emerald: #9DD292;  --c-emerald-deep: #567A4E;
+  --c-mint:    #6DD7C4;  --c-mint-deep:    #2F7E71;
+  --c-sky:     #5BCADA;  --c-sky-deep:     #297B87;
+  --c-azure:   #6EBFED;  --c-azure-deep:   #3C7696;
+  --c-indigo:  #9AA9EF;  --c-indigo-deep:  #616B9D;
+  --c-violet:  #B1A6EE;  --c-violet-deep:  #6F6699;
+  --c-sage:    #D9A1DC;  --c-sage-deep:    #865E88;
+  /* Text auf Akzentflächen */
+  --ink: #23303F;
+}
+
 [data-theme="dark"] {
-  --bg: #111;
-  --sidebar: #181818;
-  --header-bg: #141008;
-  --card: #1f1f1f;
-  --card-hover: #272727;
-  --card-active: #252520;
-  --border: #2a2a2a;
-  --text: #f0ece3;
-  --text-muted: #777;
-  --text-sub: #999;
-  --accent: #d4a853;
-  --insta: #E1306C;
-  --tag-bg: #2a2a2a;
-  --tag-text: #999;
-  --popup-bg: rgba(18,16,12,0.97);
-  --scrollbar: #333;
-  --tip-bg: rgba(212,168,83,0.08);
-  --tip-border: #c49a42;
-  --tip-text: #c49a42;
-  --breadcrumb-sep: #555;
-  --trip-btn-hover: #252525;
-  --plan-bg: #151510;
-  --plan-border: #2a2510;
-  --stop-bg: #1a1a14;
-  --drive-color: #666;
+  --bg: #151B24;
+  --sidebar: #212A36;
+  --header-bg: #1B2430;
+  --card: #212A36;
+  --card-hover: #2A3441;
+  --card-active: #2A3441;
+  --border: #37424F;
+  --text: #EEF2F5;
+  --text-muted: #9AA6B2;
+  --text-sub: #9AA6B2;
+  --accent: #6DD7C4;
+  --accent-ink: #23303F;
+  --insta: #D9A1DC;
+  --tag-bg: #2A3441;
+  --tag-text: #9AA6B2;
+  --popup-bg: rgba(33,42,54,0.97);
+  --scrollbar: #37424F;
+  --tip-bg: rgba(109,215,196,0.10);
+  --tip-border: #6DD7C4;
+  --tip-text: #6DD7C4;
+  --breadcrumb-sep: #5E6B78;
+  --trip-btn-hover: #2A3441;
+  --plan-bg: #1B2430;
+  --plan-border: #37424F;
+  --stop-bg: #2A3441;
+  --drive-color: #9AA6B2;
 }
 
 [data-theme="light"] {
-  --bg: #f2f0eb;
-  --sidebar: #ffffff;
-  --header-bg: #fffdf5;
-  --card: #faf9f6;
-  --card-hover: #f0ede5;
-  --card-active: #ece9e0;
-  --border: #e0ddd5;
-  --text: #1a1810;
-  --text-muted: #888;
-  --text-sub: #666;
-  --accent: #b8882a;
-  --insta: #C2185B;
-  --tag-bg: #ede9e0;
-  --tag-text: #666;
-  --popup-bg: rgba(255,253,248,0.97);
-  --scrollbar: #ccc;
-  --tip-bg: rgba(184,136,42,0.06);
-  --tip-border: #b8882a;
-  --tip-text: #9a6e1a;
-  --breadcrumb-sep: #bbb;
-  --trip-btn-hover: #f0ede5;
-  --plan-bg: #fffcf0;
-  --plan-border: #e8dfc0;
-  --stop-bg: #f5f2e8;
-  --drive-color: #999;
+  --bg: #F7F9FA;
+  --sidebar: #FFFFFF;
+  --header-bg: #FFFFFF;
+  --card: #FFFFFF;
+  --card-hover: #EEF2F4;
+  --card-active: #EEF2F4;
+  --border: #E4E9EC;
+  --text: #2A3340;
+  --text-muted: #5E6B78;
+  --text-sub: #5E6B78;
+  --accent: #2F7E71;
+  --accent-ink: #FFFFFF;
+  --insta: #865E88;
+  --tag-bg: #EEF2F4;
+  --tag-text: #5E6B78;
+  --popup-bg: rgba(255,255,255,0.98);
+  --scrollbar: #C3CCD5;
+  --tip-bg: rgba(47,126,113,0.07);
+  --tip-border: #2F7E71;
+  --tip-text: #2F7E71;
+  --breadcrumb-sep: #AEB9C4;
+  --trip-btn-hover: #EEF2F4;
+  --plan-bg: #F7F9FA;
+  --plan-border: #E4E9EC;
+  --stop-bg: #EEF2F4;
+  --drive-color: #5E6B78;
 }
 
 html, body { height: 100%; font-family: var(--font); background: var(--bg); color: var(--text); overflow: hidden; transition: background var(--transition), color var(--transition); }
@@ -121,13 +146,14 @@ html, body { height: 100%; font-family: var(--font); background: var(--bg); colo
 .tour-header { display: flex; align-items: center; gap: 7px; padding: 8px 4px 4px; font-size: 0.63rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--text-muted); border-bottom: 1px solid var(--border); margin-bottom: 5px; }
 .tour-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 
-.place-card { background: var(--card); border-radius: var(--radius); padding: 10px 12px 10px 13px; margin-bottom: 5px; cursor: pointer; transition: all var(--transition); border-left: 3px solid transparent; position: relative; }
-.place-card:hover { background: var(--card-hover); transform: translateX(2px); }
-.place-card.active { background: var(--card-active); }
-.place-card.in-tour { box-shadow: 0 0 0 1px var(--accent) inset; }
+.place-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px 10px 13px; margin-bottom: 5px; cursor: pointer; transition: background var(--transition), border-color var(--transition); border-left: 3px solid transparent; position: relative; }
+.place-card:hover { background: var(--card-hover); }
+.place-card.active { background: var(--card-active); border-color: var(--accent); }
+.place-card.in-tour { border-color: var(--accent); }
 
 .card-top { display: flex; align-items: flex-start; gap: 9px; }
-.card-emoji { font-size: 1.2rem; line-height: 1; flex-shrink: 0; margin-top: 1px; width: 26px; text-align: center; }
+.card-icon { flex-shrink: 0; margin-top: 1px; width: 26px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); }
+.card-icon svg { width: 18px; height: 18px; }
 .card-body { flex: 1; min-width: 0; }
 .card-name { font-size: 0.9rem; font-weight: 600; color: var(--text); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .card-sub { font-size: 0.68rem; color: var(--text-sub); margin-bottom: 4px; }
@@ -156,6 +182,95 @@ body.planning .stop-badge.visible { display: flex; }
 .insta-user { font-size: 0.65rem; color: var(--insta); margin-bottom: 3px; }
 .insta-link { display: inline-block; margin-top: 6px; font-size: 0.63rem; color: var(--insta); text-decoration: none; opacity: 0.8; }
 .insta-link:hover { opacity: 1; }
+
+.empty-trip { padding: 26px 18px; text-align: center; color: var(--text-muted); font-size: 0.75rem; line-height: 1.55; display: flex; flex-direction: column; align-items: center; gap: 7px; }
+.empty-trip strong { color: var(--text); font-size: 0.85rem; }
+.empty-trip code { background: var(--tag-bg); padding: 1px 5px; border-radius: 4px; font-size: 0.72rem; }
+
+/* ── DIALOG: NEUE REISE ── */
+#trip-overlay { position: fixed; inset: 0; background: rgba(21,27,36,0.72); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 20px; }
+#trip-overlay.open { display: flex; }
+#trip-box { background: var(--sidebar); border: 1px solid var(--border); border-radius: 14px; width: min(400px, 96vw); overflow: hidden; }
+#trip-box-header { display: flex; align-items: center; justify-content: space-between; padding: 13px 15px; border-bottom: 1px solid var(--border); }
+#trip-box-title { font-size: 0.9rem; font-weight: 700; }
+#trip-close { background: none; border: none; color: var(--text-muted); cursor: pointer; display: flex; padding: 3px; border-radius: 5px; }
+#trip-close:hover { color: var(--text); background: var(--card-hover); }
+#trip-box-body { padding: 15px; }
+.tf-label { display: block; font-size: 0.68rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; }
+.tf-opt { font-weight: 400; opacity: 0.75; }
+.tf-input { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 7px; padding: 8px 10px; color: var(--text); font-family: var(--font); font-size: 0.83rem; margin-bottom: 13px; }
+.tf-input:focus { outline: none; border-color: var(--accent); }
+#trip-error { font-size: 0.7rem; color: var(--fwi-5); min-height: 1em; line-height: 1.4; }
+[data-theme="dark"] #trip-error { color: #E8948D; }
+#trip-box-footer { display: flex; gap: 8px; justify-content: flex-end; padding: 12px 15px; border-top: 1px solid var(--border); }
+.trip-del-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; border-radius: 5px; display: flex; opacity: 0; transition: opacity var(--transition); }
+.trip-btn:hover .trip-del-btn { opacity: 1; }
+.trip-del-btn:hover { color: #E8948D; background: var(--card-hover); }
+
+/* ── LUCIDE ICONS ── */
+.ico { display: inline-flex; align-items: center; justify-content: center; vertical-align: -0.15em; }
+.ico svg { width: 1em; height: 1em; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ── FEUERWARNUNGEN ── */
+/* Offizielle EFFIS-FWI-Klassen */
+:root {
+  --fwi-1: #9CFFC0; --fwi-2: #CDE24E; --fwi-3: #E6AC00;
+  --fwi-4: #D97010; --fwi-5: #AD060E; --fwi-6: #3A0015;
+}
+
+/* Warnbanner über der Ortsliste */
+#fire-banner { display: none; margin: 6px 0 8px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--card); overflow: hidden; }
+#fire-banner.visible { display: block; }
+#fire-banner.lvl-high { border-color: var(--fwi-3); }
+#fire-banner.lvl-vhigh { border-color: var(--fwi-4); }
+#fire-banner.lvl-extreme { border-color: var(--fwi-5); }
+#fire-banner-head { display: flex; align-items: center; gap: 8px; padding: 9px 11px; font-size: 0.74rem; font-weight: 600; color: var(--text); }
+#fire-banner-head .ico { font-size: 1rem; flex-shrink: 0; }
+#fire-banner-body { padding: 0 11px 10px; font-size: 0.7rem; color: var(--text-sub); line-height: 1.5; }
+#fire-banner-src { margin-top: 6px; font-size: 0.6rem; color: var(--text-muted); }
+#fire-banner-src a { color: var(--text-muted); }
+#fire-refresh { margin-left: auto; background: none; border: 1px solid var(--border); border-radius: 14px; color: var(--text-muted); font-size: 0.6rem; padding: 2px 8px; cursor: pointer; font-family: var(--font); white-space: nowrap; }
+#fire-refresh:hover { color: var(--text); }
+
+/* FWI-Skala im Banner */
+.fwi-scale { display: flex; gap: 2px; margin-top: 7px; }
+.fwi-scale-seg { flex: 1; height: 4px; border-radius: 2px; opacity: 0.28; }
+.fwi-scale-seg.on { opacity: 1; }
+.fwi-legend { display: flex; justify-content: space-between; font-size: 0.55rem; color: var(--text-muted); margin-top: 3px; }
+
+/* Prognose-Tage */
+.fday-row { display: flex; gap: 3px; margin-top: 9px; flex-wrap: wrap; }
+.fday { flex: 1; min-width: 34px; padding: 4px 2px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); font-size: 0.6rem; cursor: pointer; font-family: var(--font); transition: all var(--transition); }
+.fday:hover { color: var(--text); border-color: var(--text-muted); }
+.fday.on { background: var(--accent); color: var(--accent-ink); border-color: transparent; font-weight: 700; }
+
+/* Gefahren-Chip auf Ortskarten */
+.fire-chip { display: inline-flex; align-items: center; gap: 3px; font-size: 0.58rem; padding: 2px 6px; border-radius: 8px; font-weight: 600; color: var(--ink); white-space: nowrap; }
+.fire-chip .ico { font-size: 0.7rem; }
+.fire-chip.hot { animation: firepulse 2s ease-in-out infinite; }
+@keyframes firepulse { 0%,100% { opacity: 1 } 50% { opacity: 0.55 } }
+
+/* Aktiver Brand in Ortsnähe */
+.fire-alert { margin-top: 6px; font-size: 0.68rem; border-radius: 5px; padding: 5px 7px; background: rgba(173,6,14,0.10); border: 1px solid var(--fwi-5); color: var(--text); display: flex; align-items: flex-start; gap: 6px; line-height: 1.4; }
+.fire-alert .ico { font-size: 0.85rem; color: var(--fwi-5); flex-shrink: 0; margin-top: 1px; }
+[data-theme="light"] .fire-alert { background: rgba(173,6,14,0.06); }
+
+/* Feuer-Marker auf der Karte */
+.fire-marker { display: flex; align-items: center; justify-content: center; }
+.fire-marker-dot { width: 14px; height: 14px; border-radius: 50%; background: var(--fwi-5); border: 2px solid rgba(255,255,255,0.85); animation: firepulse 1.8s ease-in-out infinite; }
+.fire-marker-halo { position: absolute; inset: -7px; border-radius: 50%; background: rgba(173,6,14,0.25); }
+
+/* Karten-Legende für die FWI-Ebene */
+#fwi-legend { position: absolute; bottom: 22px; left: 12px; z-index: 500; background: var(--popup-bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 0.6rem; color: var(--text); display: none; }
+#fwi-legend.visible { display: block; }
+#fwi-legend-title { font-weight: 700; margin-bottom: 5px; font-size: 0.62rem; display: flex; align-items: center; gap: 5px; }
+.fwi-legend-row { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
+.fwi-legend-sw { width: 14px; height: 9px; border-radius: 2px; flex-shrink: 0; }
+
+/* Feuer-Umschalter */
+#fire-toggle { padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; font-size: 0.67rem; font-family: var(--font); transition: all var(--transition); white-space: nowrap; display: inline-flex; align-items: center; gap: 4px; }
+#fire-toggle:hover { color: var(--fwi-4); border-color: var(--fwi-4); }
+#fire-toggle.active { background: var(--fwi-4); color: var(--ink); border-color: transparent; font-weight: 600; }
 
 /* ── TOUR PLAN PANEL ── */
 #tour-panel { background: var(--plan-bg); border-top: 2px solid var(--plan-border); flex-shrink: 0; max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
@@ -292,10 +407,10 @@ body.planning .stop-badge.visible { display: flex; }
     <div id="header">
       <div id="header-top">
         <div id="header-title">Meine Reisen</div>
-        <button id="theme-toggle">☀️ Hell</button>
+        <button id="theme-toggle"></button>
       </div>
       <div id="breadcrumb">
-        <span class="bc-item clickable" id="bc-root">🌍 Alle Reisen</span>
+        <span class="bc-item clickable" id="bc-root">Alle Reisen</span>
         <span class="bc-sep" id="bc-sep" style="display:none">›</span>
         <span class="bc-item" id="bc-trip" style="display:none"></span>
       </div>
@@ -304,17 +419,18 @@ body.planning .stop-badge.visible { display: flex; }
     <div id="trip-list"></div>
     <div id="filters" style="display:none"></div>
     <div id="ai-result-banner"></div>
+    <div id="fire-banner-wrap" style="padding:0 10px"><div id="fire-banner"></div></div>
     <div id="place-list"></div>
 
     <!-- Tour plan panel -->
     <div id="tour-panel">
       <div id="tour-panel-inner">
         <div id="tour-panel-header">
-          <div id="tour-panel-title">📍 Meine Tagestour</div>
+          <div id="tour-panel-title">Meine Tagestour</div>
           <div class="tour-panel-actions">
             <input type="time" id="tour-start-time" value="09:00" title="Startzeit">
-            <button class="tpa-btn" id="btn-timeline" title="Timeline anzeigen">🗓 Timeline</button>
-            <button class="tpa-btn primary" id="btn-maps" title="In Google Maps öffnen">🗺 Maps</button>
+            <button class="tpa-btn" id="btn-timeline" title="Timeline anzeigen">Timeline</button>
+            <button class="tpa-btn primary" id="btn-maps" title="In Google Maps öffnen">Maps</button>
           </div>
         </div>
         <ul id="stops-list"></ul>
@@ -329,6 +445,16 @@ body.planning .stop-badge.visible { display: flex; }
       <strong>Klicke einen Ort</strong>
       für Details &amp; Tipps
     </div>
+    <div id="fwi-legend">
+      <div id="fwi-legend-title">Brandgefahr (FWI)</div>
+      <div class="fwi-legend-row"><span class="fwi-legend-sw" style="background:#9CFFC0"></span>Niedrig</div>
+      <div class="fwi-legend-row"><span class="fwi-legend-sw" style="background:#CDE24E"></span>Mäßig</div>
+      <div class="fwi-legend-row"><span class="fwi-legend-sw" style="background:#E6AC00"></span>Hoch</div>
+      <div class="fwi-legend-row"><span class="fwi-legend-sw" style="background:#D97010"></span>Sehr hoch</div>
+      <div class="fwi-legend-row"><span class="fwi-legend-sw" style="background:#AD060E"></span>Extrem</div>
+      <div class="fwi-legend-row"><span class="fwi-legend-sw" style="background:#3A0015"></span>Sehr extrem</div>
+      <div class="fwi-legend-row" style="margin-top:5px"><span class="fwi-legend-sw" style="background:#AD060E;border-radius:50%;width:9px;height:9px"></span>Wärmesignal (7 T.)</div>
+    </div>
   </div>
 </div>
 
@@ -336,30 +462,131 @@ body.planning .stop-badge.visible { display: flex; }
 <div id="timeline-overlay">
   <div id="timeline-box">
     <div id="timeline-header">
-      <div id="timeline-title">📅 Tagestour Timeline</div>
-      <button id="timeline-close">✕</button>
+      <div id="timeline-title">Tagestour Timeline</div>
+      <button id="timeline-close" title="Schließen"></button>
     </div>
     <div id="timeline-body"></div>
     <div id="timeline-footer">
-      <button class="tpa-btn" id="tl-maps-btn">🗺 In Google Maps öffnen</button>
+      <button class="tpa-btn" id="tl-maps-btn">In Google Maps öffnen</button>
+    </div>
+  </div>
+</div>
+
+<!-- Neue Reise -->
+<div id="trip-overlay">
+  <div id="trip-box">
+    <div id="trip-box-header">
+      <div id="trip-box-title">Neue Reise</div>
+      <button id="trip-close" title="Schließen"></button>
+    </div>
+    <div id="trip-box-body">
+      <label class="tf-label" for="trip-name">Name der Reise</label>
+      <input class="tf-input" id="trip-name" placeholder="z. B. Andalusien" autocomplete="off">
+
+      <label class="tf-label" for="trip-place">Region oder Stadt <span class="tf-opt">(optional, für die Kartenmitte)</span></label>
+      <input class="tf-input" id="trip-place" placeholder="z. B. Sevilla, Spanien" autocomplete="off">
+
+      <label class="tf-label" for="trip-flag">Flagge <span class="tf-opt">(optional)</span></label>
+      <input class="tf-input" id="trip-flag" placeholder="🇪🇸" maxlength="8" style="width:90px">
+
+      <div id="trip-error"></div>
+    </div>
+    <div id="trip-box-footer">
+      <button class="tpa-btn" id="trip-cancel">Abbrechen</button>
+      <button class="tpa-btn primary" id="trip-save">Reise anlegen</button>
     </div>
   </div>
 </div>
 
 <div id="gallery-overlay">
   <div id="gallery-header">
-    <div id="gallery-title">🖼 Alle Sehenswürdigkeiten</div>
-    <button id="gallery-close">× Schließen</button>
+    <div id="gallery-title">Alle Sehenswürdigkeiten</div>
+    <button id="gallery-close">Schließen</button>
   </div>
   <div id="gallery-grid"></div>
   <div id="gallery-bar">
     <div id="gallery-count">Orte antippen um sie auszuwählen</div>
-    <button id="btn-gallery-plan" disabled>✨ KI-Tour planen</button>
+    <button id="btn-gallery-plan" disabled>KI-Tour planen</button>
   </div>
 </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH"
+        crossorigin="anonymous"></script>
 <script>
+// ── LUCIDE ICONS (MIT, inline & self-contained) ──
+const LUCIDE = {
+  'flame':        '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+  'flame-kindling':'<path d="M12 2c1 3 2.5 3.5 3.5 4.5A5 5 0 0 1 17 10a5 5 0 1 1-10 0c0-.3 0-.6.1-.9a2 2 0 1 0 3.3-2C8 4.5 11 2.5 12 2Z"/><path d="m5 22 14-4"/><path d="m5 18 14 4"/>',
+  'triangle-alert':'<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+  'shield-check': '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+  'refresh-cw':   '<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>',
+  'map-pin':      '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
+  'building-2':   '<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>',
+  'landmark':     '<path d="M10 18v-7"/><path d="M11.12 2.198a2 2 0 0 1 1.76.006l7.866 3.847c.476.233.31.949-.22.949H3.474c-.53 0-.695-.716-.22-.949z"/><path d="M14 18v-7"/><path d="M18 18v-7"/><path d="M3 22h18"/><path d="M6 18v-7"/>',
+  'waves':        '<path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>',
+  'mountain':     '<path d="m8 3 4 8 5-5 5 15H2L8 3z"/>',
+  'mountain-snow':'<path d="m8 3 4 8 5-5 5 15H2L8 3z"/><path d="M4.14 15.08c2.62-1.57 5.24-1.43 7.86.42 2.74 1.94 5.49 2 8.23.19"/>',
+  'trees':        '<path d="M10 10v.2A3 3 0 0 1 8.9 16H5a3 3 0 0 1-1-5.8V10a3 3 0 0 1 6 0Z"/><path d="M7 16v6"/><path d="M13 19v3"/><path d="M12 19h8.3a1 1 0 0 0 .7-1.7L18 14h.3a1 1 0 0 0 .7-1.7L16 9h.2a1 1 0 0 0 .8-1.7L13 3l-1.4 1.5"/>',
+  'sun':          '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>',
+  'moon':         '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
+  'globe':        '<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
+  'image':        '<rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>',
+  'route':        '<circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/>',
+  'calendar':     '<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>',
+  'map':          '<path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/>',
+  'sparkles':     '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>',
+  'plus':         '<path d="M5 12h14"/><path d="M12 5v14"/>',
+  'minus':        '<path d="M5 12h14"/>',
+  'x':            '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  'check':        '<path d="M20 6 9 17l-5-5"/>',
+  'chevron-right':'<path d="m9 18 6-6-6-6"/>',
+  'chevron-up':   '<path d="m18 15-6-6-6 6"/>',
+  'chevron-down': '<path d="m6 9 6 6 6-6"/>',
+  'car':          '<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/>',
+  'clock':        '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+  'utensils':     '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>',
+  'camera':       '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>',
+  'lightbulb':    '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>',
+  'anchor':       '<path d="M12 22V8"/><path d="M5 12H2a10 10 0 0 0 20 0h-3"/><circle cx="12" cy="5" r="3"/>',
+  'ship':         '<path d="M2 21c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M19.38 20A11.6 11.6 0 0 0 21 14l-8.19-5.46a2 2 0 0 0-2.22 0L2.6 14a11.6 11.6 0 0 0 1.68 6"/><path d="M12 10v4"/><path d="M12 2v3"/>',
+  'castle':       '<path d="M22 20v-9H2v9a2 2 0 0 0 2 2h18a2 2 0 0 1-2-2"/><path d="M18 11V4H6v7"/><path d="M15 22v-4a3 3 0 0 0-3-3a3 3 0 0 0-3 3v4"/><path d="M22 11V9"/><path d="M2 11V9"/><path d="M6 4V2"/><path d="M18 4V2"/><path d="M10 4V2"/><path d="M14 4V2"/>',
+  'church':       '<path d="M10 9h4"/><path d="M12 7v5"/><path d="M14 22v-4a2 2 0 0 0-4 0v4"/><path d="M18 22V5.618a1 1 0 0 0-.553-.894l-4.553-2.277a2 2 0 0 0-1.788 0L6.553 4.724A1 1 0 0 0 6 5.618V22"/><path d="m18 7 3.447 1.724a1 1 0 0 1 .553.894V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9.618a1 1 0 0 1 .553-.894L6 7"/>',
+  'candy':        '<path d="m9.5 7.5-2 2a4.95 4.95 0 1 0 7 7l2-2a4.95 4.95 0 1 0-7-7"/><path d="M14 6.5v10"/><path d="M10 7.5v10"/><path d="m16 7 1-5 1.37.68A3 3 0 0 0 19.7 3H21v1.3c0 .46.1.92.32 1.33L22 7l-5 1"/><path d="m8 17-1 5-1.37-.68A3 3 0 0 0 4.3 21H3v-1.3a3 3 0 0 0-.32-1.33L2 17l5-1"/>',
+  'grape':        '<path d="M22 5V2l-5.89 5.89"/><circle cx="16.6" cy="15.89" r="3"/><circle cx="8.11" cy="7.4" r="3"/><circle cx="12.35" cy="11.65" r="3"/><circle cx="13.91" cy="5.85" r="3"/><circle cx="18.15" cy="10.09" r="3"/><circle cx="6.56" cy="13.2" r="3"/><circle cx="10.8" cy="17.44" r="3"/><circle cx="5" cy="19" r="3"/>',
+  'footprints':   '<path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z"/><path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z"/><path d="M16 17h4"/><path d="M4 13h4"/>',
+  'tent-tree':    '<circle cx="4" cy="4" r="2"/><path d="m14 5 3-3 3 3"/><path d="m14 10 3-3 3 3"/><path d="M17 14V2"/><path d="M17 14H7l-5 8h20Z"/><path d="M8 14v8"/><path d="m9 14 5 8"/>',
+  'gem':          '<path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/>',
+  'palette':      '<path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"/><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/>',
+  'droplets':     '<path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"/><path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97"/>',
+  'shell':        '<path d="M14 11a2 2 0 1 1-4 0 4 4 0 0 1 8 0 6 6 0 0 1-12 0 8 8 0 0 1 16 0 10 10 0 1 1-20 0 11.93 11.93 0 0 1 2.42-7.22 2 2 0 0 1 3.16 2.44"/>',
+  'fish':         '<path d="M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-.94 3.47-3.44 6-7 6s-7.56-2.53-8.5-6Z"/><path d="M18 12v.5"/><path d="M16 17.93a9.77 9.77 0 0 1 0-11.86"/><path d="M7 10.67C7 8 5.58 5.97 2.73 5.5c-1 1.5-1 5 .23 6.5-1.24 1.5-1.24 5-.23 6.5C5.58 18.03 7 16 7 13.33"/><path d="M10.46 7.26C10.2 5.88 9.17 4.24 8 3h5.8a2 2 0 0 1 1.98 1.67l.23 1.4"/><path d="m16.01 17.93-.23 1.4A2 2 0 0 1 13.8 21H9.5a5.96 5.96 0 0 0 1.49-3.98"/>',
+  'compass':      '<path d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z"/><circle cx="12" cy="12" r="10"/>',
+  'sunset':       '<path d="M12 10V2"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="m16 6-4 4-4-4"/><path d="M16 18a4 4 0 0 0-8 0"/>',
+  'tree-palm':    '<path d="M13 8c0-2.76-2.46-5-5.5-5S2 5.24 2 8h2l1-1 1 1h4"/><path d="M13 7.14A5.82 5.82 0 0 1 16.5 6c3.04 0 5.5 2.24 5.5 5h-3l-1-1-1 1h-3"/><path d="M5.89 9.71c-2.15 2.15-2.3 5.47-.35 7.43l4.24-4.25.7-.7.71-.71 2.12-2.12c-1.95-1.96-5.27-1.8-7.42.35"/><path d="M11 15.5c.5 2.5-.17 4.5-1 6.5h4c2-5.5-.5-12-1-14"/>',
+  'wine':         '<path d="M8 22h8"/><path d="M7 10h10"/><path d="M12 15v7"/><path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5Z"/>',
+  'circle-alert': '<circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>',
+  'external-link':'<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+  'trash-2':      '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>',
+  'save':         '<path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/>',
+  'loader':       '<path d="M12 2v4"/><path d="m16.2 7.8 2.9-2.9"/><path d="M18 12h4"/><path d="m16.2 16.2 2.9 2.9"/><path d="M12 18v4"/><path d="m4.9 19.1 2.9-2.9"/><path d="M2 12h4"/><path d="m4.9 4.9 2.9 2.9"/>',
+};
+
+// HTML-Escape für Werte aus externen Quellen (EFFIS, Nutzereingaben)
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c =>
+  ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+
+function icon(name, size) {
+  const p = LUCIDE[name] || LUCIDE['map-pin'];
+  const st = size ? ` style="font-size:${size}"` : '';
+  return `<span class="ico"${st}><svg viewBox="0 0 24 24" aria-hidden="true">${p}</svg></span>`;
+}
+// Rohes SVG (für Leaflet-DivIcons, die kein <span> mit em-Größe erben)
+function iconSvg(name, px, color) {
+  const p = LUCIDE[name] || LUCIDE['map-pin'];
+  return `<svg viewBox="0 0 24 24" width="${px}" height="${px}" fill="none" stroke="${color || 'currentColor'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+}
+
 // ── DATA ──
 const TRIPS = [
   {
@@ -451,53 +678,122 @@ const TRIPS = [
 // ── WIKIPEDIA IMAGES ──
 const WIKI_TITLES = {
   'palermo': 'Palermo', 'monreale': 'Monreale Cathedral', 'cefalu': 'Cefalù',
-  'san-vito': 'San Vito Lo Capo', 'zingaro': 'Zingaro nature reserve',
+  'san-vito': 'San Vito Lo Capo', 'zingaro': 'Riserva naturale dello Zingaro',
   'erice': 'Erice', 'trapani': 'Trapani', 'segesta': 'Segesta', 'selinunte': 'Selinunte',
-  'catania': 'Catania', 'etna': 'Mount Etna', 'alcantara': 'Gole dell\'Alcantara',
+  'catania': 'Catania', 'etna': 'Mount Etna', 'alcantara': 'Alcantara (river)',
   'taormina': 'Taormina', 'isola-bella': 'Isola Bella (Sicily)',
   'syrakus': 'Syracuse, Sicily', 'noto': 'Noto, Sicily', 'modica': 'Modica',
-  'ragusa': 'Ragusa Ibla', 'agrigento': 'Valley of the Temples',
-  'scala-turchi': 'Scala dei Turchi', 'torre-salsa': 'Torre Salsa, Sicily',
+  'ragusa': 'Ragusa Ibla', 'agrigento': 'Valle dei Templi',
+  'scala-turchi': 'Scala dei Turchi', 'torre-salsa': 'Siculiana',
   'stromboli': 'Stromboli', 'vulcano': 'Vulcano', 'lipari': 'Lipari',
   'mondello': 'Mondello', 'san-vito-s': 'San Vito Lo Capo', 'marzamemi': 'Marzamemi',
   'letojanni': 'Letojanni', 'isola-bella-s': 'Isola Bella (Sicily)',
-  'calamosche': 'Calamosche', 'guidaloca': 'Scopello, Sicily',
+  'calamosche': 'Vendicari', 'guidaloca': 'Castellammare del Golfo',
   'punta-bianca': 'Scala dei Turchi', 'marinello': 'Tindari',
   'portopalo': 'Portopalo di Capo Passero', 'cala-rossa': 'Favignana'
 };
 
-const imageCache = new Map();
+// Artikel ohne Bild auf en.wikipedia → italienischer Artikel als Rückfall
+const WIKI_FALLBACK_IT = {
+  'Vendicari': 'Riserva naturale orientata Oasi Faunistica di Vendicari',
+  'Castellammare del Golfo': 'Scopello (Castellammare del Golfo)'
+};
+
+// ── ORT → LUCIDE-ICON ──
+const PLACE_ICONS = {
+  'palermo':'building-2', 'monreale':'church', 'cefalu':'palette',
+  'san-vito':'tree-palm', 'zingaro':'footprints', 'erice':'mountain-snow',
+  'trapani':'sunset', 'segesta':'landmark', 'selinunte':'landmark',
+  'catania':'building-2', 'etna':'flame-kindling', 'alcantara':'droplets',
+  'taormina':'gem', 'isola-bella':'tree-palm',
+  'syrakus':'landmark', 'noto':'church', 'modica':'candy', 'ragusa':'church',
+  'agrigento':'landmark', 'scala-turchi':'waves', 'torre-salsa':'trees',
+  'mondello':'tree-palm', 'san-vito-s':'waves', 'marzamemi':'fish',
+  'letojanni':'waves', 'isola-bella-s':'tree-palm',
+  'calamosche':'trees', 'guidaloca':'shell', 'punta-bianca':'waves',
+  'marinello':'waves', 'portopalo':'compass', 'cala-rossa':'ship',
+  'stromboli':'flame-kindling', 'vulcano':'droplets', 'lipari':'map'
+};
+const TOUR_ICONS = {
+  'nord':'landmark', 'west':'waves', 'etna':'flame-kindling', 'barock':'church',
+  'sued':'landmark', 'strände-bekannt':'tree-palm', 'strände-geheim':'trees', 'inseln':'ship'
+};
+const placeIcon = id => PLACE_ICONS[id] || 'map-pin';
+const tourIcon  = id => TOUR_ICONS[id] || 'map-pin';
+
+const imageCache = new Map();   // wiki-Titel → URL (oder null)
+let imagesReady = null;         // Promise des laufenden Batch-Ladens
+
+// Die Thumbnail-URL NICHT selbst umschreiben: Wikimedia erlaubt nur bestimmte
+// Breiten und hängt inzwischen eine ?utm_source-Query an — beides führte beim
+// alten /\d+px-/ → /400px-/-Replace zu HTTP 400 (= kaputte Bilder).
+// Stattdessen die gewünschte Größe direkt per pithumbsize anfragen.
+async function fetchWikiBatch(titles, lang = 'en') {
+  const out = new Map();
+  if (!titles.length) return out;
+  // API erlaubt 50 Titel pro Anfrage
+  for (let i = 0; i < titles.length; i += 50) {
+    const chunk = titles.slice(i, i + 50);
+    const url = `https://${lang}.wikipedia.org/w/api.php?action=query&format=json&origin=*`
+      + `&prop=pageimages&piprop=thumbnail&pithumbsize=400&redirects=1`
+      + `&titles=${encodeURIComponent(chunk.join('|'))}`;
+    try {
+      const data = await (await fetch(url)).json();
+      // Titel können normalisiert oder per Redirect umgeleitet werden —
+      // beides zurückverfolgen, damit wir wieder beim angefragten Titel landen.
+      const back = new Map();
+      (data.query?.normalized || []).forEach(n => back.set(n.to, n.from));
+      (data.query?.redirects  || []).forEach(r => back.set(r.to, r.from));
+      Object.values(data.query?.pages || {}).forEach(p => {
+        const src = p.thumbnail?.source || null;
+        let t = p.title;
+        const seen = new Set();
+        while (back.has(t) && !seen.has(t)) { seen.add(t); t = back.get(t); }
+        out.set(t, src);
+        if (t !== p.title) out.set(p.title, src);
+      });
+    } catch {}
+  }
+  return out;
+}
 
 async function fetchWikiImage(title) {
   if (!title) return null;
+  if (imagesReady) await imagesReady;
   if (imageCache.has(title)) return imageCache.get(title);
-  try {
-    const res = await fetch(
-      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`
-    );
-    const data = await res.json();
-    const img = data.thumbnail?.source?.replace(/\/\d+px-/, '/400px-') || null;
-    imageCache.set(title, img);
-    return img;
-  } catch {
-    imageCache.set(title, null);
-    return null;
-  }
+  const got = await fetchWikiBatch([title]);
+  const src = got.get(title) || null;
+  imageCache.set(title, src);
+  return src;
 }
 
 async function preloadPlaceImages(trip) {
-  const places = trip.tours.flatMap(t => t.places);
-  for (const place of places) {
-    const title = WIKI_TITLES[place.id];
-    if (!title) continue;
-    fetchWikiImage(title).then(img => {
-      if (!img) return;
-      // Update sidebar card thumbnail
-      const thumb = document.getElementById('thumb-' + place.id);
-      if (thumb) { thumb.src = img; thumb.classList.add('loaded'); }
-    });
-    await new Promise(r => setTimeout(r, 80)); // polite rate limiting
-  }
+  const wanted = [...new Set(
+    trip.tours.flatMap(t => t.places).map(p => WIKI_TITLES[p.id]).filter(Boolean)
+  )].filter(t => !imageCache.has(t));
+
+  imagesReady = (async () => {
+    const got = await fetchWikiBatch(wanted);
+    wanted.forEach(t => imageCache.set(t, got.get(t) || null));
+    // Einige Artikel haben kein Bild → auf it.wikipedia ausweichen
+    const missing = wanted.filter(t => !imageCache.get(t) && WIKI_FALLBACK_IT[t]);
+    if (missing.length) {
+      const it = await fetchWikiBatch(missing.map(t => WIKI_FALLBACK_IT[t]), 'it');
+      missing.forEach(t => {
+        const src = it.get(WIKI_FALLBACK_IT[t]);
+        if (src) imageCache.set(t, src);
+      });
+    }
+  })();
+  await imagesReady;
+
+  // Thumbnails der bereits gerenderten Karten nachziehen
+  trip.tours.flatMap(t => t.places).forEach(place => {
+    const src = imageCache.get(WIKI_TITLES[place.id]);
+    if (!src) return;
+    const thumb = document.getElementById('thumb-' + place.id);
+    if (thumb) { thumb.src = src; thumb.classList.add('loaded'); }
+  });
 }
 
 // ── MAP ──
@@ -512,28 +808,416 @@ function setMapTiles(t) {
   currentTileLayer = L.tileLayer(url, { attribution: '© <a href="https://carto.com/">CARTO</a> © OSM', subdomains: 'abcd', maxZoom: 19 }).addTo(map);
 }
 
+// ══════════════════════════════════════════════════════════════════
+// ── FEUERWARNUNGEN ──
+// Quelle: EFFIS / Copernicus (European Forest Fire Information System)
+//   1) Brandgefahr: Fire Weather Index (FWI), ECMWF-Modell, Prognose bis 9 Tage
+//   2) Aktive Brände: VIIRS-Hotspots der letzten 7 Tage
+// Beide Dienste liefern CORS `*`, laufen also direkt im Browser ohne Server-Key.
+// ══════════════════════════════════════════════════════════════════
+const EFFIS_WMS = 'https://maps.effis.emergency.copernicus.eu/gwis';
+
+// Offizielle EFFIS-Klassen, Farben aus GetLegendGraphic übernommen.
+// Das Rendering ist farbcodiert, deshalb lesen wir die Klasse aus dem Pixel.
+const FWI_CLASSES = [
+  { rgb: [156, 255, 192], lvl: 1, name: 'Niedrig',     range: '< 11,2',    color: '#9CFFC0' },
+  { rgb: [205, 226,  78], lvl: 2, name: 'Mäßig',       range: '11,2–21,3', color: '#CDE24E' },
+  { rgb: [230, 172,   0], lvl: 3, name: 'Hoch',        range: '21,3–38,0', color: '#E6AC00' },
+  { rgb: [217, 112,  16], lvl: 4, name: 'Sehr hoch',   range: '38,0–50,0', color: '#D97010' },
+  { rgb: [173,   6,  14], lvl: 5, name: 'Extrem',      range: '50,0–70,0', color: '#AD060E' },
+  { rgb: [ 58,   0,  21], lvl: 6, name: 'Sehr extrem', range: '> 70,0',    color: '#3A0015' },
+];
+
+const FIRE_ADVICE = {
+  1: 'Normale Vorsicht. Offenes Feuer bleibt im Sommer trotzdem verboten.',
+  2: 'Gute Bedingungen. Auf Rauchentwicklung in der Umgebung achten.',
+  3: 'Erhöhte Gefahr. Wanderungen früh starten, ausreichend Wasser mitnehmen.',
+  4: 'Hohe Gefahr. Wanderungen in Naturreservaten nur morgens, Rückweg einplanen.',
+  5: 'Extreme Gefahr. Reservate und Waldgebiete meiden, Alternativen am Wasser wählen.',
+  6: 'Höchste Gefahrenstufe. Naturgebiete meiden und lokale Sperrungen beachten.',
+};
+
+const fireState = {
+  enabled: false,
+  loading: false,
+  date: null,           // Datum der aktuellen Abfrage (YYYY-MM-DD)
+  offset: 0,            // 0 = heute, 1..N = Prognosetage
+  byPlace: {},          // placeId → { lvl, name, range, color }
+  hotspots: [],         // { lat, lng, at }
+  hotspotsCapped: false,
+  maxLvl: 0,
+  error: null,
+};
+
+let fwiTileLayer = null;
+let fireMarkerLayer = null;
+
+const isoDay = off => {
+  const d = new Date();
+  d.setUTCDate(d.getUTCDate() + off);
+  return d.toISOString().slice(0, 10);
+};
+
+// ── 1) FWI je Ort aus der gerenderten WMS-Kachel lesen ──
+// Ein einziger GetMap-Request deckt ganz Sizilien ab; daraus sampeln wir
+// die Pixel aller Orte. crossOrigin=anonymous hält die Canvas untainted.
+const SICILY_BBOX = { w: 11.9, s: 36.3, e: 15.9, n: 38.6 };
+
+function classifyPixel(r, g, b, a) {
+  if (a < 40) return null;                       // transparent = kein Wert (Meer)
+  let best = null, bestD = Infinity;
+  for (const c of FWI_CLASSES) {
+    const d = (c.rgb[0]-r)**2 + (c.rgb[1]-g)**2 + (c.rgb[2]-b)**2;
+    if (d < bestD) { bestD = d; best = c; }
+  }
+  // Nur akzeptieren, wenn die Farbe wirklich einer Klasse entspricht.
+  // Verhindert, dass Zwischentöne an Kachelrändern als Wert durchgehen.
+  return bestD <= 900 ? best : null;
+}
+
+async function loadFwiForPlaces(places, dateStr) {
+  const W = 900, H = 520;
+  const { w, s, e, n } = SICILY_BBOX;
+  const url = `${EFFIS_WMS}?service=WMS&version=1.1.1&request=GetMap`
+    + `&layers=ecmwf.fwi&styles=&format=image/png&transparent=true`
+    + `&srs=EPSG:4326&bbox=${w},${s},${e},${n}&width=${W}&height=${H}&time=${dateStr}`;
+
+  const img = await new Promise((res, rej) => {
+    const im = new Image();
+    im.crossOrigin = 'anonymous';
+    im.onload = () => res(im);
+    im.onerror = () => rej(new Error('FWI-Kachel nicht ladbar'));
+    im.src = url;
+  });
+
+  const cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d', { willReadFrequently: true });
+  ctx.drawImage(img, 0, 0);
+
+  let data;
+  try {
+    data = ctx.getImageData(0, 0, W, H).data;
+  } catch {
+    throw new Error('Canvas gesperrt (CORS)');
+  }
+
+  const out = {};
+  for (const p of places) {
+    if (p.lat == null || p.lng == null) continue;
+    const px = Math.round((p.lng - w) / (e - w) * (W - 1));
+    const py = Math.round((n - p.lat) / (n - s) * (H - 1));
+    if (px < 0 || py < 0 || px >= W || py >= H) continue;
+
+    // Küstenorte liegen oft auf einem transparenten Pixel → kleine Spirale suchen
+    let hit = null;
+    for (let r = 0; r <= 6 && !hit; r++) {
+      for (let dy = -r; dy <= r && !hit; dy++) {
+        for (let dx = -r; dx <= r && !hit; dx++) {
+          if (r > 0 && Math.abs(dx) !== r && Math.abs(dy) !== r) continue;
+          const x = px + dx, y = py + dy;
+          if (x < 0 || y < 0 || x >= W || y >= H) continue;
+          const i = (y * W + x) * 4;
+          hit = classifyPixel(data[i], data[i+1], data[i+2], data[i+3]);
+        }
+      }
+    }
+    if (hit) out[p.id] = { lvl: hit.lvl, name: hit.name, range: hit.range, color: hit.color };
+  }
+  return out;
+}
+
+// ── 2) Aktive Brände (VIIRS-Hotspots, 7 Tage) ──
+// GetFeatureInfo liefert hier nur GML (kein JSON), daher XML-Parsing.
+const HOTSPOT_LIMIT = 800;   // Obergrenze der Abfrage; wird sie erreicht, ist die Liste gekappt
+
+async function loadHotspots() {
+  const { w, s, e, n } = SICILY_BBOX;
+  const W = 900, H = 520;
+  const q = new URLSearchParams({
+    service: 'WMS', version: '1.1.1', request: 'GetFeatureInfo',
+    layers: 'viirs.hs.week', query_layers: 'viirs.hs.week', styles: '',
+    srs: 'EPSG:4326', bbox: `${w},${s},${e},${n}`,
+    width: W, height: H, x: Math.round(W/2), y: Math.round(H/2),
+    feature_count: String(HOTSPOT_LIMIT), radius: String(Math.max(W, H)),
+    info_format: 'application/vnd.ogc.gml',
+  });
+  const txt = await (await fetch(`${EFFIS_WMS}?${q}`)).text();
+  const xml = new DOMParser().parseFromString(txt, 'text/xml');
+
+  // Struktur: <viirs.hs.week_feature><gml:boundedBy>…<gml:coordinates>
+  //   <id>…</id><acq_at>…</acq_at></viirs.hs.week_feature>
+  // Feature-Elemente sind namensraumlos und heißen "<layer>_feature".
+  const spots = [];
+  Array.from(xml.getElementsByTagName('*'))
+    .filter(el => el.localName.endsWith('_feature'))
+    .forEach(feat => {
+      const coordEl = Array.from(feat.getElementsByTagName('*'))
+        .find(e => e.localName === 'coordinates');
+      if (!coordEl) return;
+      const [lng, lat] = (coordEl.textContent.trim().split(/\s+/)[0] || '').split(',').map(Number);
+      if (!isFinite(lat) || !isFinite(lng)) return;
+      const atEl = Array.from(feat.getElementsByTagName('*'))
+        .find(e => e.localName === 'acq_at');
+      spots.push({ lat, lng, at: atEl ? atEl.textContent.trim() : '' });
+    });
+
+  // Wurde das Limit ausgereizt, hat EFFIS die Liste abgeschnitten —
+  // die angezeigte Zahl ist dann eine Untergrenze, kein Gesamtwert.
+  fireState.hotspotsCapped = spots.length >= HOTSPOT_LIMIT;
+
+  // Duplikate (gleicher Punkt, mehrere Überflüge) zusammenfassen
+  const seen = new Set();
+  return spots.filter(h => {
+    const k = `${h.lat.toFixed(4)},${h.lng.toFixed(4)}`;
+    if (seen.has(k)) return false;
+    seen.add(k); return true;
+  });
+}
+
+const HOTSPOT_RADIUS_KM = 20;   // ab dieser Nähe warnen wir am Ort
+
+function hotspotsNear(place, spots) {
+  if (place.lat == null) return [];
+  return spots
+    .map(h => ({ ...h, dist: haversine(place.lat, place.lng, h.lat, h.lng) }))
+    .filter(h => h.dist <= HOTSPOT_RADIUS_KM)
+    .sort((a, b) => a.dist - b.dist);
+}
+
+// ── Laden & Rendern ──
+async function refreshFireData() {
+  if (!currentTrip || fireState.loading) return;
+  fireState.loading = true;
+  fireState.error = null;
+  renderFireBanner();
+
+  const places = currentTrip.tours.flatMap(t => t.places);
+  const dateStr = isoDay(fireState.offset);
+  fireState.date = dateStr;
+
+  // Hotspots nur für heute anzeigen — für Prognosetage gibt es sie nicht.
+  const [fwi, spots] = await Promise.all([
+    loadFwiForPlaces(places, dateStr).catch(e => { fireState.error = e.message; return {}; }),
+    fireState.offset === 0 ? loadHotspots().catch(() => []) : Promise.resolve([]),
+  ]);
+
+  fireState.byPlace = fwi;
+  fireState.hotspots = spots;
+  fireState.maxLvl = Object.values(fwi).reduce((m, v) => Math.max(m, v.lvl), 0);
+  fireState.loading = false;
+
+  renderFireBanner();
+  renderFireMarkers();
+  applyFireChips();
+}
+
+function renderFireMarkers() {
+  if (fireMarkerLayer) { map.removeLayer(fireMarkerLayer); fireMarkerLayer = null; }
+  if (!fireState.enabled || !fireState.hotspots.length) return;
+
+  fireMarkerLayer = L.layerGroup();
+  fireState.hotspots.forEach(h => {
+    const m = L.marker([h.lat, h.lng], {
+      icon: L.divIcon({
+        className: '',
+        html: `<div class="fire-marker"><div class="fire-marker-halo"></div><div class="fire-marker-dot"></div></div>`,
+        iconSize: [14, 14], iconAnchor: [7, 7],
+      }),
+      zIndexOffset: 1000,
+    });
+    const when = h.at ? esc(h.at.replace(' ', ' um ')) + ' UTC' : 'Zeitpunkt unbekannt';
+    m.bindPopup(
+      `<div class="popup-title">Wärmesignal (VIIRS)</div>`
+      + `<div class="popup-sub">Erfasst: ${when}</div>`
+      + `<div style="font-size:0.68rem;margin-top:6px;color:var(--text-muted);line-height:1.45">`
+      + `Satellitendetektion der letzten 7 Tage. Kann auch Industrie oder ein `
+      + `bereits gelöschtes Feuer sein — keine amtliche Warnung.</div>`
+    );
+    fireMarkerLayer.addLayer(m);
+  });
+  fireMarkerLayer.addTo(map);
+}
+
+function setFwiLayer(on) {
+  if (fwiTileLayer) { map.removeLayer(fwiTileLayer); fwiTileLayer = null; }
+  document.getElementById('fwi-legend').classList.toggle('visible', on);
+  if (!on) return;
+  fwiTileLayer = L.tileLayer.wms(EFFIS_WMS, {
+    layers: 'ecmwf.fwi', styles: '', format: 'image/png',
+    transparent: true, version: '1.1.1', opacity: 0.3,
+    time: fireState.date || isoDay(fireState.offset),
+    attribution: '© <a href="https://forest-fire.emergency.copernicus.eu/">EFFIS / Copernicus</a>',
+  });
+  fwiTileLayer.addTo(map);
+  if (fireMarkerLayer) fireMarkerLayer.bringToFront?.();
+}
+
+function renderFireBanner() {
+  const el = document.getElementById('fire-banner');
+  if (!el) return;
+  if (!fireState.enabled) { el.classList.remove('visible'); return; }
+  el.classList.add('visible');
+
+  if (fireState.loading) {
+    el.className = 'visible';
+    el.innerHTML = `<div id="fire-banner-head">${icon('loader')} Brandgefahr wird geladen …</div>`;
+    return;
+  }
+  if (fireState.error && !Object.keys(fireState.byPlace).length) {
+    el.className = 'visible';
+    el.innerHTML = `<div id="fire-banner-head">${icon('circle-alert')} Brandgefahr nicht abrufbar</div>`
+      + `<div id="fire-banner-body">${fireState.error}. `
+      + `<a href="https://forest-fire.emergency.copernicus.eu/apps/effis_current_situation_test/" target="_blank" rel="noopener">Direkt bei EFFIS nachsehen ${icon('external-link')}</a></div>`;
+    return;
+  }
+
+  const lvl = fireState.maxLvl;
+  const cls = lvl >= 5 ? 'lvl-extreme' : lvl === 4 ? 'lvl-vhigh' : lvl === 3 ? 'lvl-high' : '';
+  el.className = 'visible ' + cls;
+
+  const top = FWI_CLASSES.find(c => c.lvl === lvl);
+  const nHot = fireState.hotspots.length;
+  const affected = Object.entries(fireState.byPlace)
+    .filter(([, v]) => v.lvl >= 4)
+    .map(([id]) => currentTrip.tours.flatMap(t => t.places).find(p => p.id === id))
+    .filter(Boolean);
+
+  const dayLabel = fireState.offset === 0
+    ? 'heute'
+    : `in ${fireState.offset} Tag${fireState.offset > 1 ? 'en' : ''} (${fireState.date.split('-').reverse().join('.')})`;
+
+  const scale = FWI_CLASSES.map(c =>
+    `<div class="fwi-scale-seg${c.lvl <= lvl ? ' on' : ''}" style="background:${c.color}"></div>`
+  ).join('');
+
+  let body = '';
+  if (top) {
+    body += `Höchste Stufe auf dieser Reise ${dayLabel}: <strong style="color:${top.color}">${top.name}</strong> (FWI ${top.range}).`;
+    body += `<div class="fwi-scale">${scale}</div>`;
+    body += `<div class="fwi-legend"><span>Niedrig</span><span>Sehr extrem</span></div>`;
+    body += `<div style="margin-top:7px">${FIRE_ADVICE[lvl] || ''}</div>`;
+    if (affected.length) {
+      body += `<div style="margin-top:6px">Betroffen: ${affected.map(p => p.name).join(', ')}.</div>`;
+    }
+  } else {
+    body += `Für ${dayLabel} liegen keine Gefahrenwerte vor.`;
+  }
+  if (fireState.offset === 0) {
+    if (nHot) {
+      const more = fireState.hotspotsCapped ? 'mindestens ' : '';
+      body += `<div style="margin-top:6px">${more}${nHot} Wärmesignal${nHot > 1 ? 'e' : ''} `
+        + `der letzten 7 Tage auf der Karte.`
+        + (fireState.hotspotsCapped ? ` <span style="color:var(--text-muted)">(Abfrage gekappt)</span>` : '')
+        + `</div>`;
+    } else {
+      body += `<div style="margin-top:6px">Keine Wärmesignale der letzten 7 Tage in der Region.</div>`;
+    }
+  }
+  body += `<div id="fire-banner-src">Quelle: EFFIS / Copernicus (ECMWF-Prognose, VIIRS-Hotspots). `
+    + `Orientierung, keine amtliche Warnung — im Zweifel Protezione Civile beachten.</div>`;
+
+  const headIcon = lvl >= 4 ? 'triangle-alert' : lvl === 3 ? 'flame' : 'shield-check';
+  const headColor = top ? top.color : 'var(--text-muted)';
+  // Prognose-Umschalter: ECMWF liefert bis zu 9 Tage voraus
+  const days = [0, 1, 2, 3, 4, 5, 6].map(o => {
+    const d = new Date(); d.setUTCDate(d.getUTCDate() + o);
+    const lbl = o === 0 ? 'Heute'
+      : ['So','Mo','Di','Mi','Do','Fr','Sa'][d.getUTCDay()];
+    return `<button class="fday${o === fireState.offset ? ' on' : ''}" data-off="${o}">${lbl}</button>`;
+  }).join('');
+
+  el.innerHTML =
+    `<div id="fire-banner-head"><span style="color:${headColor}">${icon(headIcon)}</span>`
+    + `Brandgefahr ${dayLabel}`
+    + `<button id="fire-refresh" title="Aktualisieren">${icon('refresh-cw')} Neu laden</button></div>`
+    + `<div id="fire-banner-body">${body}`
+    + `<div class="fday-row" title="Prognose (ECMWF)">${days}</div></div>`;
+
+  el.querySelector('#fire-refresh')?.addEventListener('click', ev => {
+    ev.stopPropagation();
+    refreshFireData();
+  });
+  el.querySelectorAll('.fday').forEach(b => b.addEventListener('click', ev => {
+    ev.stopPropagation();
+    fireState.offset = +b.dataset.off;
+    refreshFireData().then(() => { if (fireState.enabled) setFwiLayer(true); });
+  }));
+}
+
+// Gefahren-Chip in jede Ortskarte einsetzen
+function applyFireChips() {
+  document.querySelectorAll('.place-card[data-place-id]').forEach(card => {
+    card.querySelectorAll('.fire-chip, .fire-alert').forEach(n => n.remove());
+    if (!fireState.enabled) return;
+
+    const id = card.dataset.placeId;
+    const info = fireState.byPlace[id];
+    const tagRow = card.querySelector('.card-tags');
+    if (info && tagRow) {
+      const chip = document.createElement('span');
+      chip.className = 'fire-chip' + (info.lvl >= 5 ? ' hot' : '');
+      chip.style.background = info.color;
+      chip.style.color = info.lvl >= 5 ? '#fff' : 'var(--ink)';
+      chip.title = `Fire Weather Index ${info.range} — ${info.name}`;
+      chip.innerHTML = `${icon('flame')} ${info.name}`;
+      tagRow.appendChild(chip);
+    }
+
+    const place = currentTrip?.tours.flatMap(t => t.places).find(p => p.id === id);
+    if (!place) return;
+    const near = hotspotsNear(place, fireState.hotspots);
+    if (!near.length) return;
+    const body = card.querySelector('.card-body');
+    if (!body) return;
+    const div = document.createElement('div');
+    div.className = 'fire-alert';
+    const d = near[0].dist;
+    div.innerHTML = `${icon('triangle-alert')}<div><strong>${near.length} Wärmesignal${near.length > 1 ? 'e' : ''} in der Nähe</strong> `
+      + `(nächstes ~${d < 1 ? '<1' : Math.round(d)} km). Erfasst in den letzten 7 Tagen.</div>`;
+    body.appendChild(div);
+  });
+}
+
+function setFireMode(on) {
+  fireState.enabled = on;
+  const btn = document.getElementById('fire-toggle');
+  if (btn) {
+    btn.classList.toggle('active', on);
+    btn.innerHTML = `${icon('flame')} Feuer`;
+  }
+  setFwiLayer(on);
+  renderFireBanner();
+  renderFireMarkers();
+  if (on && !Object.keys(fireState.byPlace).length) refreshFireData();
+  else applyFireChips();
+}
+
 // ── THEME ──
 const root = document.documentElement;
 let theme = localStorage.getItem('theme') || 'dark';
 root.setAttribute('data-theme', theme);
 setMapTiles(theme);
 const themeBtn = document.getElementById('theme-toggle');
-themeBtn.textContent = theme === 'dark' ? '☀️ Hell' : '🌙 Dunkel';
+themeBtn.innerHTML = theme === 'dark' ? `${icon('sun')} Hell` : `${icon('moon')} Dunkel`;
 themeBtn.addEventListener('click', () => {
   theme = theme === 'dark' ? 'light' : 'dark';
   root.setAttribute('data-theme', theme);
   localStorage.setItem('theme', theme);
-  themeBtn.textContent = theme === 'dark' ? '☀️ Hell' : '🌙 Dunkel';
+  themeBtn.innerHTML = theme === 'dark' ? `${icon('sun')} Hell` : `${icon('moon')} Dunkel`;
   setMapTiles(theme);
   if (tourRouteLayer) drawRouteOnMap();
 });
 
 // ── MARKERS ──
-function makeIcon(color, emoji, active = false) {
+function makeIcon(color, iconName, active = false) {
   const s = active ? 36 : 30;
+  const g = active ? 17 : 14;
   return L.divIcon({
     className: '',
-    html: `<div style="width:${s}px;height:${s}px;background:${color};border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid rgba(255,255,255,0.25);box-shadow:0 3px 10px rgba(0,0,0,0.4)"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transform:rotate(45deg);font-size:${active?15:12}px">${emoji}</div></div>`,
+    html: `<div style="width:${s}px;height:${s}px;background:${color};border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid rgba(255,255,255,0.3)">`
+      + `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transform:rotate(45deg);color:${'#23303F'}">`
+      + `${iconSvg(iconName, g, '#23303F')}</div></div>`,
     iconSize: [s, s], iconAnchor: [s/2, s]
   });
 }
@@ -573,14 +1257,25 @@ function showTripList() {
     const total = trip.tours.reduce((a, t) => a + t.places.length, 0);
     const btn = document.createElement('button');
     btn.className = 'trip-btn';
-    btn.innerHTML = `<div class="trip-flag">${trip.flag}</div><div class="trip-info"><div class="trip-name">${trip.name}</div><div class="trip-sub">${total} Orte · ${trip.tours.length} Touren</div></div><div style="font-size:0.9rem;color:var(--text-muted)">›</div>`;
+    const sub = trip.tours.length
+      ? `${total} Orte · ${trip.tours.length} Touren`
+      : 'Noch keine Orte';
+    btn.innerHTML = `<div class="trip-flag">${esc(trip.flag)}</div>`
+      + `<div class="trip-info"><div class="trip-name">${esc(trip.name)}</div>`
+      + `<div class="trip-sub">${sub}</div></div>`
+      + (trip.custom ? `<button class="trip-del-btn" title="Reise löschen">${icon('trash-2')}</button>` : '')
+      + `<div style="color:var(--text-muted);display:flex">${icon('chevron-right')}</div>`;
     btn.addEventListener('click', () => openTrip(trip));
+    btn.querySelector('.trip-del-btn')?.addEventListener('click', e => {
+      e.stopPropagation();
+      deleteTrip(trip);
+    });
     tripListEl.appendChild(btn);
   });
   const addBtn = document.createElement('button');
   addBtn.className = 'trip-add-btn';
-  addBtn.innerHTML = `<span>+</span> Neue Reise hinzufügen`;
-  addBtn.addEventListener('click', () => alert('Neue Reise: kommt bald!'));
+  addBtn.innerHTML = `${icon('plus')} Neue Reise hinzufügen`;
+  addBtn.addEventListener('click', openTripDialog);
   tripListEl.appendChild(addBtn);
   map.flyTo([30, 14], 3, { duration: 1.2 });
 }
@@ -591,13 +1286,119 @@ function openTrip(trip) {
   bcSep.style.display = ''; bcTrip.style.display = '';
   bcTrip.textContent = `${trip.flag} ${trip.name}`;
   tripListEl.style.display = 'none'; filtersEl.style.display = '';
+
+  // Bei Reisewechsel gelten die alten Feuerdaten nicht mehr
+  fireState.byPlace = {}; fireState.hotspots = []; fireState.maxLvl = 0;
+
   buildFilters(trip); buildPlaceList(trip, 'all'); buildMarkers(trip);
   map.flyTo(trip.center, trip.zoom, { duration: 1.2 });
+
+  if (!trip.tours.length) {
+    placeListEl.innerHTML = `<div class="empty-trip">${icon('map-pin','1.6rem')}`
+      + `<div><strong>Noch keine Orte</strong></div>`
+      + `<div>Diese Reise ist angelegt, aber noch leer. Orte lassen sich `
+      + `derzeit nur im Code (TRIPS) oder über <code>add-spot.py</code> ergänzen.</div></div>`;
+    return;
+  }
+
   loadUserSpots(trip.id);
   preloadPlaceImages(trip);
+  if (fireState.enabled) refreshFireData();
 }
 
 bcRoot.addEventListener('click', showTripList);
+
+// ══════════════════════════════════════════════════════════════════
+// ── EIGENE REISEN (localStorage) ──
+// ══════════════════════════════════════════════════════════════════
+const TRIPS_KEY = 'myTrips.v1';
+
+function loadCustomTrips() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(TRIPS_KEY) || '[]');
+    return raw.filter(t => t && t.id && t.name).map(t => ({
+      ...t, custom: true,
+      tours: Array.isArray(t.tours) ? t.tours : [],
+    }));
+  } catch { return []; }
+}
+
+function saveCustomTrips() {
+  const mine = TRIPS.filter(t => t.custom);
+  try { localStorage.setItem(TRIPS_KEY, JSON.stringify(mine)); }
+  catch (e) { alert('Konnte Reise nicht speichern: ' + e.message); }
+}
+
+// Geocoding über OpenStreetMap Nominatim (frei, kein Key)
+async function geocode(q) {
+  const url = 'https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(q);
+  try {
+    const r = await fetch(url, { headers: { 'Accept': 'application/json' } });
+    const d = await r.json();
+    if (!d.length) return null;
+    return { lat: +d[0].lat, lng: +d[0].lon, label: d[0].display_name };
+  } catch { return null; }
+}
+
+function openTripDialog() {
+  const ov = document.getElementById('trip-overlay');
+  ov.classList.add('open');
+  const nameEl = document.getElementById('trip-name');
+  nameEl.value = ''; document.getElementById('trip-flag').value = '';
+  document.getElementById('trip-place').value = '';
+  document.getElementById('trip-error').textContent = '';
+  nameEl.focus();
+}
+function closeTripDialog() {
+  document.getElementById('trip-overlay').classList.remove('open');
+}
+
+async function submitTripDialog() {
+  const name = document.getElementById('trip-name').value.trim();
+  const flag = document.getElementById('trip-flag').value.trim();
+  const where = document.getElementById('trip-place').value.trim();
+  const errEl = document.getElementById('trip-error');
+  const saveBtn = document.getElementById('trip-save');
+
+  if (!name) { errEl.textContent = 'Bitte einen Namen angeben.'; return; }
+  if (TRIPS.some(t => t.name.toLowerCase() === name.toLowerCase())) {
+    errEl.textContent = 'Es gibt schon eine Reise mit diesem Namen.'; return;
+  }
+
+  errEl.textContent = '';
+  const orig = saveBtn.innerHTML;
+  saveBtn.disabled = true;
+  saveBtn.innerHTML = `${icon('loader')} Suche Ort …`;
+
+  let center = [37.5, 14.2], zoom = 8;
+  if (where) {
+    const g = await geocode(where);
+    if (!g) {
+      errEl.textContent = `Ort „${where}" nicht gefunden. Ohne Ort speichern oder anders schreiben.`;
+      saveBtn.disabled = false; saveBtn.innerHTML = orig;
+      return;
+    }
+    center = [g.lat, g.lng]; zoom = 9;
+  }
+
+  const id = 'trip-' + name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+    + '-' + Math.random().toString(36).slice(2, 6);
+  const trip = { id, name, flag: flag || '🌍', center, zoom, custom: true, tours: [] };
+  TRIPS.push(trip);
+  saveCustomTrips();
+
+  saveBtn.disabled = false; saveBtn.innerHTML = orig;
+  closeTripDialog();
+  showTripList();
+}
+
+function deleteTrip(trip) {
+  if (!confirm(`Reise „${trip.name}" wirklich löschen?`)) return;
+  const i = TRIPS.indexOf(trip);
+  if (i > -1) TRIPS.splice(i, 1);
+  saveCustomTrips();
+  showTripList();
+}
 
 // ── PLANNING MODE ──
 function setPlanningMode(on) {
@@ -606,7 +1407,7 @@ function setPlanningMode(on) {
   const planToggleBtn = document.getElementById('plan-toggle');
   if (planToggleBtn) {
     planToggleBtn.classList.toggle('active', on);
-    planToggleBtn.textContent = on ? '✕ Fertig' : '📍 Tagestour';
+    planToggleBtn.innerHTML = on ? `${icon('check')} Fertig` : `${icon('route')} Tagestour`;
   }
   if (on) {
     tourPanel.classList.add('open');
@@ -664,7 +1465,7 @@ function renderTourPanel() {
       const { dist, minutes } = driveEstimate(prev, place);
       const driveLi = document.createElement('div');
       driveLi.className = 'drive-row';
-      driveLi.innerHTML = `<div class="drive-line"></div><span>🚗 ~${minutes} Min (${dist} km Luftlinie)</span><div class="drive-line"></div>`;
+      driveLi.innerHTML = `<div class="drive-line"></div><span>${icon('car')} ~${minutes} Min (${dist} km Luftlinie)</span><div class="drive-line"></div>`;
       stopsList.appendChild(driveLi);
       current += minutes;
     }
@@ -676,13 +1477,13 @@ function renderTourPanel() {
     li.innerHTML = `
       <div class="stop-num">${i+1}</div>
       <div class="stop-info">
-        <div class="stop-name">${place.emoji} ${place.name}</div>
+        <div class="stop-name">${icon(placeIcon(place.id))} ${place.name}</div>
         <div class="stop-time">Ankunft ~${arrTime} · ${place.visitMin || 90} Min Besuch</div>
       </div>
       <div class="stop-controls">
-        <button class="stop-ctrl-btn" data-idx="${i}" data-dir="-1" title="Früher">↑</button>
-        <button class="stop-ctrl-btn" data-idx="${i}" data-dir="1" title="Später">↓</button>
-        <button class="stop-ctrl-btn" data-idx="${i}" data-dir="x" title="Entfernen" style="color:#E07B69">✕</button>
+        <button class="stop-ctrl-btn" data-idx="${i}" data-dir="-1" title="Früher">${icon('chevron-up')}</button>
+        <button class="stop-ctrl-btn" data-idx="${i}" data-dir="1" title="Später">${icon('chevron-down')}</button>
+        <button class="stop-ctrl-btn" data-idx="${i}" data-dir="x" title="Entfernen" style="color:var(--fwi-5)">${icon('x')}</button>
       </div>`;
     stopsList.appendChild(li);
   });
@@ -797,7 +1598,7 @@ function showTimeline() {
       </div>
       <div class="tl-content">
         <div class="tl-time">${arrTime} Uhr</div>
-        <div class="tl-name">${place.emoji} ${place.name}</div>
+        <div class="tl-name">${icon(placeIcon(place.id))} ${place.name}</div>
         <div class="tl-sub">${place.sub}</div>
         <span class="tl-duration">bis ~${endTime} Uhr · ${place.visitMin || 90} Min</span>
       </div>`;
@@ -828,20 +1629,28 @@ function buildFilters(trip) {
     btn.className = 'filter-btn';
     btn.dataset.tour = tour.id;
     btn.style.cssText = `color:${tour.color};border-color:${tour.color}55`;
-    btn.textContent = `${tour.emoji} ${tour.name.split(' ')[0]}`;
+    btn.innerHTML = `${icon(tourIcon(tour.id))} ${tour.name.split(' ')[0]}`;
     btn.addEventListener('click', () => setTour(trip, tour.id, btn));
     filtersEl.appendChild(btn);
   });
 
+  const fireBtn = document.createElement('button');
+  fireBtn.id = 'fire-toggle';
+  fireBtn.title = 'Brandgefahr & aktive Wärmesignale (EFFIS/Copernicus)';
+  fireBtn.innerHTML = `${icon('flame')} Feuer`;
+  fireBtn.classList.toggle('active', fireState.enabled);
+  fireBtn.addEventListener('click', () => setFireMode(!fireState.enabled));
+  filtersEl.appendChild(fireBtn);
+
   const planBtn = document.createElement('button');
   planBtn.id = 'plan-toggle';
-  planBtn.textContent = '📍 Tagestour';
+  planBtn.innerHTML = `${icon('route')} Tagestour`;
   planBtn.addEventListener('click', () => setPlanningMode(!planningMode));
   filtersEl.appendChild(planBtn);
 
   const galBtn = document.createElement('button');
   galBtn.className = 'gallery-btn';
-  galBtn.textContent = '🖼 Galerie';
+  galBtn.innerHTML = `${icon('image')} Galerie`;
   galBtn.addEventListener('click', () => openGallery(trip));
   filtersEl.appendChild(galBtn);
 }
@@ -885,12 +1694,13 @@ function buildPlaceList(trip, tourId) {
   toShow.forEach(tour => {
     const section = document.createElement('div');
     section.className = 'tour-section';
-    section.innerHTML = `<div class="tour-header"><div class="tour-dot" style="background:${tour.color}"></div>${tour.emoji} ${tour.name}</div>`;
+    section.innerHTML = `<div class="tour-header"><div class="tour-dot" style="background:${tour.color}"></div>${icon(tourIcon(tour.id))} ${tour.name}</div>`;
     tour.places.forEach(place => {
       section.appendChild(makePlaceCard(place, tour));
     });
     placeListEl.appendChild(section);
   });
+  applyFireChips();
 }
 
 function makePlaceCard(place, tour) {
@@ -910,13 +1720,13 @@ function makePlaceCard(place, tour) {
     <div class="stop-badge ${badgeVisible}">${badgeText}</div>
     <button class="card-plan-btn ${addedClass}" title="Zur Tagestour hinzufügen">${planBtnText}</button>
     <div class="card-top">
-      <div class="card-emoji">${place.emoji}</div>
+      <div class="card-icon" style="color:${tour.color}">${icon(placeIcon(place.id))}</div>
       <div class="card-body">
         <div class="card-name">${place.name}</div>
         <div class="card-sub">${place.sub}</div>
         <div class="card-tags">${place.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
         <div class="card-desc">${place.desc}</div>
-        ${place.tip ? `<div class="card-tips">💡 ${place.tip}</div>` : ''}
+        ${place.tip ? `<div class="card-tips">${icon('lightbulb')} ${place.tip}</div>` : ''}
       </div>
       <img class="card-thumb" id="thumb-${place.id}" alt="${place.name}">
     </div>`;
@@ -949,8 +1759,8 @@ function buildMarkers(trip) {
   resetMarkers();
   trip.tours.forEach(tour => {
     tour.places.forEach(place => {
-      const marker = L.marker([place.lat, place.lng], { icon: makeIcon(tour.color, tour.emoji) }).addTo(map);
-      marker.bindPopup(`<div class="popup-emoji">${place.emoji}</div><div class="popup-title">${place.name}</div><div class="popup-sub">${place.sub}</div><ul class="popup-highlights">${place.highlights.slice(0,4).map(h=>`<li>${h}</li>`).join('')}</ul>${place.tip?`<div class="popup-tip">💡 ${place.tip}</div>`:''}<img id="popup-img-${place.id}" class="popup-img" alt="${place.name}" style="display:none">`);
+      const marker = L.marker([place.lat, place.lng], { icon: makeIcon(tour.color, placeIcon(place.id)) }).addTo(map);
+      marker.bindPopup(`<div class="popup-emoji" style="color:${tour.color}">${icon(placeIcon(place.id),"1.5rem")}</div><div class="popup-title">${place.name}</div><div class="popup-sub">${place.sub}</div><ul class="popup-highlights">${place.highlights.slice(0,4).map(h=>`<li>${h}</li>`).join('')}</ul>${place.tip?`<div class="popup-tip">${icon('lightbulb')} ${place.tip}</div>`:''}<img id="popup-img-${place.id}" class="popup-img" alt="${place.name}" style="display:none">`);
       marker.on('popupopen', () => {
         const wikiTitle = WIKI_TITLES[place.id];
         if (!wikiTitle) return;
@@ -971,11 +1781,11 @@ function highlightCard(placeId, color, marker, tour) {
     const prev = document.getElementById('card-' + activeCardId);
     if (prev) prev.classList.remove('active');
     const pm = markers[activeCardId];
-    if (pm) pm.marker.setIcon(makeIcon(pm.tour.color, pm.tour.emoji));
+    if (pm) pm.marker.setIcon(makeIcon(pm.tour.color, placeIcon(activeCardId)));
   }
   const card = document.getElementById('card-' + placeId);
   if (card) { card.classList.add('active'); card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
-  marker.setIcon(makeIcon(color, tour.emoji, true));
+  marker.setIcon(makeIcon(color, placeIcon(placeId), true));
   activeCardId = placeId;
 }
 
@@ -1007,7 +1817,7 @@ function renderUserSpots(spots) {
       </div>`
     : '';
 
-  section.innerHTML = `<div class="tour-header"><div class="tour-dot" style="background:#E1306C"></div>📸 Deine Fundstücke</div>${tagFilterHtml}`;
+  section.innerHTML = `<div class="tour-header"><div class="tour-dot" style="background:var(--insta)"></div>${icon('camera')} Deine Fundstücke</div>${tagFilterHtml}`;
 
   const instaMarkers = {}; // id → leaflet marker
 
@@ -1025,16 +1835,16 @@ function renderUserSpots(spots) {
       card.style.borderLeftColor = '#E1306C';
       const img = spot.image
         ? `<img src="${spot.image}" class="insta-thumb" alt="">`
-        : `<div class="insta-thumb-placeholder">📸</div>`;
+        : `<div class="insta-thumb-placeholder">${icon('camera')}</div>`;
       const locBadge = spot.lat && spot.lng
-        ? `<span style="font-size:0.6rem;color:#E1306C;margin-left:4px">📍 auf Karte</span>`
+        ? `<span style="font-size:0.6rem;color:var(--insta);margin-left:4px">${icon('map-pin')} auf Karte</span>`
         : `<span style="font-size:0.6rem;color:var(--text-muted);margin-left:4px">kein Standort</span>`;
       card.innerHTML = `<div class="insta-card">${img}<div class="insta-body">
         <div class="card-name" style="font-size:0.85rem">${spot.name}${locBadge}</div>
         <div class="insta-user">@${spot.username}</div>
         <div class="card-tags">${(spot.tags||[]).map(t=>`<span class="tag" style="cursor:pointer" data-filter-tag="${t}">${t}</span>`).join('')}</div>
         <div class="card-desc" style="font-size:0.72rem">${spot.desc}</div>
-        <a href="${spot.source_url}" target="_blank" class="insta-link">→ Instagram</a>
+        <a href="${spot.source_url}" target="_blank" rel="noopener" class="insta-link">Instagram ${icon('external-link')}</a>
       </div></div>`;
 
       // Click on tag chip → filter by that tag
@@ -1111,7 +1921,7 @@ function openGallery(trip) {
   trip.tours.forEach(tour => {
     const heading = document.createElement('div');
     heading.className = 'gallery-section-title';
-    heading.innerHTML = `<span style="color:${tour.color}">${tour.emoji} ${tour.name}</span>`;
+    heading.innerHTML = `<span style="color:${tour.color}">${icon(tourIcon(tour.id))} ${tour.name}</span>`;
     galleryGrid.appendChild(heading);
     tour.places.forEach(place => {
       const card = document.createElement('div');
@@ -1121,9 +1931,9 @@ function openGallery(trip) {
       card.innerHTML = `
         ${wikiTitle
           ? `<img class="gallery-card-img" alt="${place.name}" src="">`
-          : `<div class="gallery-card-placeholder">${place.emoji}</div>`}
+          : `<div class="gallery-card-placeholder">${icon(placeIcon(place.id),"1.8rem")}</div>`}
         <div class="gallery-card-overlay">
-          <div class="gallery-card-emoji">${place.emoji}</div>
+          <div class="gallery-card-emoji">${icon(placeIcon(place.id))}</div>
           <div class="gallery-card-name">${place.name}</div>
           <div class="gallery-card-tour" style="color:${tour.color}">${tour.name}</div>
         </div>
@@ -1161,8 +1971,8 @@ btnGalleryPlan.addEventListener('click', async () => {
   const allPlaces = currentTrip.tours.flatMap(t => t.places.map(p => ({ ...p, _tour: t })));
   const selected = [...gallerySelected].map(id => allPlaces.find(p => p.id === id)).filter(Boolean);
 
-  const orig = btnGalleryPlan.textContent;
-  btnGalleryPlan.textContent = '⏳ KI plant...';
+  const orig = btnGalleryPlan.innerHTML;
+  btnGalleryPlan.innerHTML = `${icon('loader')} KI plant …`;
   btnGalleryPlan.disabled = true;
 
   try {
@@ -1180,7 +1990,7 @@ btnGalleryPlan.addEventListener('click', async () => {
     setPlanningMode(true);
 
     if (data.reasoning) {
-      aiResultBanner.innerHTML = `✨ <strong>KI-Empfehlung:</strong> ${data.reasoning}${data.tip ? `<br>💡 <em>${data.tip}</em>` : ''} <button onclick="this.parentElement.style.display='none'" style="float:right;background:none;border:none;cursor:pointer;color:inherit;font-size:1rem;line-height:1">×</button>`;
+      aiResultBanner.innerHTML = `${icon('sparkles')} <strong>KI-Empfehlung:</strong> ${data.reasoning}${data.tip ? `<br>💡 <em>${data.tip}</em>` : ''} <button onclick="this.parentElement.style.display='none'" style="float:right;background:none;border:none;cursor:pointer;color:inherit;font-size:1rem;line-height:1">×</button>`;
       aiResultBanner.classList.add('visible');
       aiResultBanner.style.display = 'block';
     }
@@ -1189,12 +1999,49 @@ btnGalleryPlan.addEventListener('click', async () => {
     alert('Fehler beim KI-Planen: ' + e.message);
     btnGalleryPlan.disabled = false;
   } finally {
-    btnGalleryPlan.textContent = orig;
+    btnGalleryPlan.innerHTML = orig;
     if (gallerySelected.size >= 2) btnGalleryPlan.disabled = false;
   }
 });
 
+// ── DIALOG NEUE REISE: VERDRAHTUNG ──
+document.getElementById('trip-close').innerHTML = icon('x');
+document.getElementById('trip-close').addEventListener('click', closeTripDialog);
+document.getElementById('trip-cancel').addEventListener('click', closeTripDialog);
+document.getElementById('trip-save').innerHTML = `${icon('save')} Reise anlegen`;
+document.getElementById('trip-save').addEventListener('click', submitTripDialog);
+document.getElementById('trip-overlay').addEventListener('click', e => {
+  if (e.target.id === 'trip-overlay') closeTripDialog();
+});
+['trip-name', 'trip-place', 'trip-flag'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', e => {
+    if (e.key === 'Enter') submitTripDialog();
+  });
+});
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  closeTripDialog();
+  document.getElementById('gallery-overlay').classList.remove('open');
+  document.getElementById('timeline-overlay').classList.remove('open');
+});
+
 // ── INIT ──
+// Icons in die statischen Buttons setzen
+document.getElementById('timeline-close').innerHTML = icon('x');
+document.getElementById('gallery-close').innerHTML = `${icon('x')} Schließen`;
+document.getElementById('tl-maps-btn').innerHTML = `${icon('map')} In Google Maps öffnen`;
+document.getElementById('btn-gallery-plan').innerHTML = `${icon('sparkles')} KI-Tour planen`;
+document.getElementById('btn-timeline').innerHTML = `${icon('calendar')} Timeline`;
+document.getElementById('btn-maps').innerHTML = `${icon('map')} Maps`;
+document.getElementById('tour-panel-title').innerHTML = `${icon('route')} Meine Tagestour`;
+document.getElementById('timeline-title').innerHTML = `${icon('calendar')} Tagestour Timeline`;
+document.getElementById('gallery-title').innerHTML = `${icon('image')} Alle Sehenswürdigkeiten`;
+document.getElementById('bc-root').innerHTML = `${icon('globe')} Alle Reisen`;
+themeBtn.innerHTML = theme === 'dark' ? `${icon('sun')} Hell` : `${icon('moon')} Dunkel`;
+
+// Gespeicherte eigene Reisen dazuladen
+TRIPS.push(...loadCustomTrips());
+
 openTrip(TRIPS[0]);
 </script>
 
