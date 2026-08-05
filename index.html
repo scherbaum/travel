@@ -346,6 +346,18 @@ body.planning .stop-badge.visible { display: flex; }
   </div>
 </div>
 
+<div id="gallery-overlay">
+  <div id="gallery-header">
+    <div id="gallery-title">🖼 Alle Sehenswürdigkeiten</div>
+    <button id="gallery-close">× Schließen</button>
+  </div>
+  <div id="gallery-grid"></div>
+  <div id="gallery-bar">
+    <div id="gallery-count">Orte antippen um sie auszuwählen</div>
+    <button id="btn-gallery-plan" disabled>✨ KI-Tour planen</button>
+  </div>
+</div>
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 // ── DATA ──
@@ -1186,16 +1198,5 @@ btnGalleryPlan.addEventListener('click', async () => {
 openTrip(TRIPS[0]);
 </script>
 
-<div id="gallery-overlay">
-  <div id="gallery-header">
-    <div id="gallery-title">🖼 Alle Sehenswürdigkeiten</div>
-    <button id="gallery-close">× Schließen</button>
-  </div>
-  <div id="gallery-grid"></div>
-  <div id="gallery-bar">
-    <div id="gallery-count">Orte antippen um sie auszuwählen</div>
-    <button id="btn-gallery-plan" disabled>✨ KI-Tour planen</button>
-  </div>
-</div>
 </body>
 </html>
