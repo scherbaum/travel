@@ -855,18 +855,30 @@ async function loadUserSpots(tripId) {
 function renderUserSpots(spots) {
   const section = document.createElement('div');
   section.className = 'tour-section';
-  section.innerHTML = `<div class="tour-header"><div class="tour-dot" style="background:var(--insta)"></div>📸 Deine Fundstücke</div>`;
+  section.innerHTML = `<div class="tour-header"><div class="tour-dot" style="background:#E1306C"></div>📸 Deine Fundstücke</div>`;
   spots.forEach(spot => {
     const card = document.createElement('div');
     card.className = 'place-card';
     card.id = 'spot-' + spot.id;
     card.dataset.placeId = 'spot-' + spot.id;
-    card.style.borderLeftColor = 'var(--insta)';
+    card.style.borderLeftColor = '#E1306C';
     const img = spot.image ? `<img src="${spot.image}" class="insta-thumb" alt="">` : `<div class="insta-thumb-placeholder">📸</div>`;
-    card.innerHTML = `<div class="insta-card">${img}<div class="insta-body"><div class="card-name" style="font-size:0.85rem">${spot.name}</div><div class="insta-user">@${spot.username}</div><div class="card-tags">${(spot.tags||[]).map(t=>`<span class="tag">${t}</span>`).join('')}</div><div class="card-desc" style="font-size:0.72rem">${spot.desc}</div><a href="${spot.source_url}" target="_blank" class="insta-link">→ Instagram</a></div></div>`;
+    const locBadge = spot.lat && spot.lng
+      ? `<span style="font-size:0.6rem;color:#E1306C;margin-left:4px">📍 auf Karte</span>`
+      : `<span style="font-size:0.6rem;color:var(--text-muted);margin-left:4px">kein Standort</span>`;
+    card.innerHTML = `<div class="insta-card">${img}<div class="insta-body"><div class="card-name" style="font-size:0.85rem">${spot.name}${locBadge}</div><div class="insta-user">@${spot.username}</div><div class="card-tags">${(spot.tags||[]).map(t=>`<span class="tag">${t}</span>`).join('')}</div><div class="card-desc" style="font-size:0.72rem">${spot.desc}</div><a href="${spot.source_url}" target="_blank" class="insta-link">→ Instagram</a></div></div>`;
     if (spot.lat && spot.lng) {
-      const m = L.marker([spot.lat, spot.lng], { icon: makeIcon('var(--insta)', '📸') }).addTo(map).bindPopup(`<div class="popup-emoji">📸</div><div class="popup-title">${spot.name}</div><div class="popup-sub">@${spot.username}</div>`);
-      card.addEventListener('click', () => { map.flyTo([spot.lat, spot.lng], 14, { duration: 1.2 }); setTimeout(() => m.openPopup(), 1200); });
+      const instaIcon = L.divIcon({
+        className: '',
+        html: `<div style="width:32px;height:32px;background:#E1306C;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid rgba(255,255,255,0.3);box-shadow:0 3px 10px rgba(225,48,108,0.5)"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transform:rotate(45deg);font-size:14px">📸</div></div>`,
+        iconSize: [32, 32], iconAnchor: [16, 32]
+      });
+      const m = L.marker([spot.lat, spot.lng], { icon: instaIcon }).addTo(map);
+      m.bindPopup(`<div class="popup-emoji">📸</div><div class="popup-title">${spot.name}</div><div class="popup-sub">@${spot.username}</div>${spot.image ? `<img src="${spot.image}" style="width:100%;border-radius:6px;margin-top:6px;max-height:120px;object-fit:cover" alt="">` : ''}`);
+      card.addEventListener('click', () => {
+        map.flyTo([spot.lat, spot.lng], 14, { duration: 1.2 });
+        setTimeout(() => m.openPopup(), 1200);
+      });
     }
     section.appendChild(card);
   });
