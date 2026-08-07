@@ -296,6 +296,20 @@ body.planning .stop-badge.visible { display: flex; }
 .tpa-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
 .tpa-btn.primary:hover { opacity: 0.9; }
 
+/* Gespeicherte Touren */
+#tour-select-row { display: flex; align-items: center; gap: 5px; margin-bottom: 8px; flex-wrap: wrap; }
+#tour-picker { flex: 1; min-width: 130px; background: var(--stop-bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: var(--font); font-size: 0.7rem; padding: 4px 6px; cursor: pointer; }
+#tour-picker:focus { outline: none; border-color: var(--accent); }
+.ts-btn { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); font-size: 0.63rem; cursor: pointer; font-family: var(--font); transition: all var(--transition); white-space: nowrap; }
+.ts-btn:hover { color: var(--text); border-color: var(--text-muted); }
+#ts-save { color: var(--accent); border-color: var(--accent); }
+#ts-save:hover { background: var(--accent); color: var(--accent-ink); }
+#ts-del:hover { color: #E8948D; border-color: #E8948D; }
+#tour-dirty { color: var(--accent); font-size: 1.1rem; line-height: 1; opacity: 0; transition: opacity var(--transition); }
+#tour-dirty.visible { opacity: 1; }
+#tour-status { font-size: 0.62rem; color: var(--accent); opacity: 0; transition: opacity var(--transition); }
+#tour-status.visible { opacity: 1; }
+
 #tour-start-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
 #tour-start-row label { font-size: 0.65rem; color: var(--text-muted); white-space: nowrap; }
 #tour-start-time { background: var(--stop-bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: var(--font); font-size: 0.75rem; padding: 3px 7px; width: 80px; }
@@ -450,6 +464,7 @@ body.planning .stop-badge.visible { display: flex; }
             <button class="tpa-btn primary" id="btn-maps" title="In Google Maps öffnen">Maps</button>
           </div>
         </div>
+        <div id="tour-select-row"></div>
         <ul id="stops-list"></ul>
         <div id="tour-empty">Orte antippen um zur Tagestour hinzuzufügen</div>
       </div>
@@ -584,6 +599,7 @@ const LUCIDE = {
   'wine':         '<path d="M8 22h8"/><path d="M7 10h10"/><path d="M12 15v7"/><path d="M12 15a5 5 0 0 0 5-5c0-2-.5-4-2-8H9c-1.5 4-2 6-2 8a5 5 0 0 0 5 5Z"/>',
   'circle-alert': '<circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>',
   'external-link':'<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+  'pencil':       '<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/>',
   'trash-2':      '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>',
   'save':         '<path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/>',
   'loader':       '<path d="M12 2v4"/><path d="m16.2 7.8 2.9-2.9"/><path d="M18 12h4"/><path d="m16.2 16.2 2.9 2.9"/><path d="M12 18v4"/><path d="m4.9 19.1 2.9-2.9"/><path d="M2 12h4"/><path d="m4.9 4.9 2.9 2.9"/>',
@@ -1306,6 +1322,9 @@ function openTrip(trip) {
 
   // Bei Reisewechsel gelten die alten Feuerdaten nicht mehr
   fireState.byPlace = {}; fireState.hotspots = []; fireState.maxLvl = 0;
+  // Touren gehoeren zur Reise — beim Wechsel neu laden und Panel leeren
+  tourPlan = [];
+  loadSavedTours(trip.id);
 
   buildFilters(trip); buildPlaceList(trip, 'all'); buildMarkers(trip);
   map.flyTo(trip.center, trip.zoom, { duration: 1.2 });
@@ -1417,6 +1436,206 @@ function deleteTrip(trip) {
   showTripList();
 }
 
+// ══════════════════════════════════════════════════════════════════
+// ── GESPEICHERTE TOUREN ──
+// Mehrere Touren je Reise anlegen, benennen, wieder laden und aendern.
+// Gespeichert werden nur Orts-IDs, nicht die Ortsdaten selbst — so bleiben
+// die Touren gueltig, wenn sich Beschreibungen oder Bilder aendern.
+// ══════════════════════════════════════════════════════════════════
+const TOURS_KEY = 'savedTours.v1';
+
+let savedTours = [];      // Touren der aktuellen Reise
+let activeTourId = null;  // welche Tour gerade im Panel liegt
+let tourDirty = false;    // ungespeicherte Aenderungen?
+
+function allSavedTours() {
+  try { return JSON.parse(localStorage.getItem(TOURS_KEY) || '{}'); }
+  catch { return {}; }
+}
+
+function loadSavedTours(tripId) {
+  const all = allSavedTours();
+  savedTours = Array.isArray(all[tripId]) ? all[tripId] : [];
+  activeTourId = null;
+  tourDirty = false;
+}
+
+function persistSavedTours() {
+  if (!currentTrip) return;
+  const all = allSavedTours();
+  all[currentTrip.id] = savedTours;
+  try { localStorage.setItem(TOURS_KEY, JSON.stringify(all)); }
+  catch (e) { alert('Konnte Tour nicht speichern: ' + e.message); }
+}
+
+// Ortsobjekt anhand der ID wiederfinden (inkl. zugehoeriger Kategorie)
+function findPlace(placeId) {
+  if (!currentTrip) return null;
+  for (const tour of currentTrip.tours) {
+    const place = tour.places.find(p => p.id === placeId);
+    if (place) return { place, tour };
+  }
+  return null;
+}
+
+function currentTourSnapshot() {
+  return {
+    stops: tourPlan.map(s => s.place.id),
+    startTime: document.getElementById('tour-start-time').value || '09:00',
+  };
+}
+
+function markTourDirty() {
+  tourDirty = true;
+  renderTourSelect();
+}
+
+// Tour speichern.
+//   saveCurrentTour()          → aktive Tour aktualisieren (oder neu, wenn keine aktiv)
+//   saveCurrentTour({asNew:1}) → immer als neue Tour anlegen
+function saveCurrentTour(opts = {}) {
+  if (!tourPlan.length) { alert('Die Tour ist noch leer.'); return; }
+  const snap = currentTourSnapshot();
+
+  if (!opts.asNew && activeTourId) {
+    const t = savedTours.find(t => t.id === activeTourId);
+    if (t) {
+      Object.assign(t, snap, { updated: new Date().toISOString().slice(0, 10) });
+      persistSavedTours();
+      tourDirty = false;
+      renderTourSelect();
+      flashTourStatus('Tour aktualisiert');
+      return;
+    }
+  }
+
+  const proposed = prompt('Name der Tour:', suggestTourName());
+  if (proposed === null) return;                 // abgebrochen
+  const finalName = proposed.trim() || suggestTourName();
+
+  const tour = {
+    id: 't-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+    name: finalName,
+    ...snap,
+    created: new Date().toISOString().slice(0, 10),
+    updated: new Date().toISOString().slice(0, 10),
+  };
+  savedTours.push(tour);
+  activeTourId = tour.id;
+  tourDirty = false;
+  persistSavedTours();
+  renderTourSelect();
+  flashTourStatus('Tour gespeichert');
+}
+
+function suggestTourName() {
+  const first = tourPlan[0]?.place.name;
+  const last = tourPlan[tourPlan.length - 1]?.place.name;
+  if (!first) return 'Neue Tour';
+  const base = tourPlan.length > 1 ? `${first} → ${last}` : first;
+  let name = base, i = 2;
+  while (savedTours.some(t => t.name === name)) name = `${base} (${i++})`;
+  return name;
+}
+
+function loadTour(tourId) {
+  const t = savedTours.find(t => t.id === tourId);
+  if (!t) return;
+  if (tourDirty && !confirm('Die aktuelle Tour hat ungespeicherte Änderungen. Trotzdem laden?')) return;
+
+  const missing = [];
+  tourPlan = t.stops.map(id => {
+    const found = findPlace(id);
+    if (!found) { missing.push(id); return null; }
+    return { place: found.place, tour: found.tour };
+  }).filter(Boolean);
+
+  document.getElementById('tour-start-time').value = t.startTime || '09:00';
+  activeTourId = tourId;
+  tourDirty = false;
+  renderTourPanel(); updateCardBadges(); drawRouteOnMap();
+  setPlanningMode(true);
+  renderTourSelect();
+  if (missing.length) {
+    flashTourStatus(`${missing.length} Ort${missing.length > 1 ? 'e' : ''} nicht mehr vorhanden`);
+  }
+}
+
+function deleteTour(tourId) {
+  const t = savedTours.find(t => t.id === tourId);
+  if (!t) return;
+  if (!confirm(`Tour „${t.name}" löschen?`)) return;
+  savedTours = savedTours.filter(x => x.id !== tourId);
+  if (activeTourId === tourId) { activeTourId = null; tourDirty = tourPlan.length > 0; }
+  persistSavedTours();
+  renderTourSelect();
+}
+
+function renameTour(tourId) {
+  const t = savedTours.find(t => t.id === tourId);
+  if (!t) return;
+  const name = prompt('Neuer Name:', t.name);
+  if (name === null) return;
+  const trimmed = name.trim();
+  if (!trimmed) return;
+  t.name = trimmed;
+  t.updated = new Date().toISOString().slice(0, 10);
+  persistSavedTours();
+  renderTourSelect();
+}
+
+function newTour() {
+  if (tourDirty && tourPlan.length && !confirm('Ungespeicherte Änderungen verwerfen?')) return;
+  tourPlan = [];
+  activeTourId = null;
+  tourDirty = false;
+  renderTourPanel(); updateCardBadges(); drawRouteOnMap();
+  renderTourSelect();
+}
+
+let statusTimer = null;
+function flashTourStatus(msg) {
+  const el = document.getElementById('tour-status');
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.add('visible');
+  clearTimeout(statusTimer);
+  statusTimer = setTimeout(() => el.classList.remove('visible'), 2200);
+}
+
+// Auswahlleiste ueber der Tour: gespeicherte Touren + Aktionen
+function renderTourSelect() {
+  const wrap = document.getElementById('tour-select-row');
+  if (!wrap) return;
+  const active = savedTours.find(t => t.id === activeTourId);
+
+  const opts = savedTours.map(t =>
+    `<option value="${t.id}"${t.id === activeTourId ? ' selected' : ''}>${esc(t.name)} (${t.stops.length})</option>`
+  ).join('');
+
+  wrap.innerHTML =
+    `<select id="tour-picker" title="Gespeicherte Touren">`
+    + `<option value="">${savedTours.length ? '– Tour wählen –' : '– noch keine Tour gespeichert –'}</option>`
+    + opts + `</select>`
+    + `<button class="ts-btn" id="ts-save" title="${active ? 'Änderungen speichern' : 'Als neue Tour speichern'}">`
+    + `${icon('save')} Speichern</button>`
+    + (active ? `<button class="ts-btn" id="ts-saveas" title="Als neue Tour speichern">${icon('plus')}</button>` : '')
+    + (active ? `<button class="ts-btn" id="ts-rename" title="Umbenennen">${icon('pencil')}</button>` : '')
+    + (active ? `<button class="ts-btn" id="ts-del" title="Tour löschen">${icon('trash-2')}</button>` : '')
+    + `<button class="ts-btn" id="ts-new" title="Tour leeren (neue Tour beginnen)">${icon('x')}</button>`
+    + `<span id="tour-dirty"${tourDirty && tourPlan.length ? ' class="visible"' : ''} title="Ungespeicherte Änderungen">•</span>`
+    + `<span id="tour-status"></span>`;
+
+  wrap.querySelector('#tour-picker').addEventListener('change', e => {
+    if (e.target.value) loadTour(e.target.value);
+  });
+  wrap.querySelector('#ts-save').addEventListener('click', () => saveCurrentTour());
+  wrap.querySelector('#ts-saveas')?.addEventListener('click', () => saveCurrentTour({ asNew: true }));
+  wrap.querySelector('#ts-rename')?.addEventListener('click', () => renameTour(activeTourId));
+  wrap.querySelector('#ts-del')?.addEventListener('click', () => deleteTour(activeTourId));
+  wrap.querySelector('#ts-new').addEventListener('click', newTour);
+}
+
 // ── PLANNING MODE ──
 function setPlanningMode(on) {
   planningMode = on;
@@ -1428,6 +1647,7 @@ function setPlanningMode(on) {
   }
   if (on) {
     tourPanel.classList.add('open');
+    renderTourSelect();
     renderTourPanel();
   } else {
     tourPanel.classList.remove('open');
@@ -1445,6 +1665,7 @@ function toggleTourStop(place, tour) {
   renderTourPanel();
   updateCardBadges();
   drawRouteOnMap();
+  markTourDirty();
 }
 
 function updateCardBadges() {
@@ -1514,12 +1735,12 @@ function renderTourPanel() {
       if (dir === 'x') { tourPlan.splice(idx, 1); }
       else if (dir === '-1' && idx > 0) { [tourPlan[idx], tourPlan[idx-1]] = [tourPlan[idx-1], tourPlan[idx]]; }
       else if (dir === '1' && idx < tourPlan.length - 1) { [tourPlan[idx], tourPlan[idx+1]] = [tourPlan[idx+1], tourPlan[idx]]; }
-      renderTourPanel(); updateCardBadges(); drawRouteOnMap();
+      renderTourPanel(); updateCardBadges(); drawRouteOnMap(); markTourDirty();
     });
   });
 }
 
-document.getElementById('tour-start-time').addEventListener('change', renderTourPanel);
+document.getElementById('tour-start-time').addEventListener('change', () => { renderTourPanel(); markTourDirty(); });
 
 // ── TIME HELPERS ──
 function parseTime(str) { const [h, m] = str.split(':').map(Number); return h * 60 + m; }
@@ -2086,6 +2307,7 @@ btnGalleryPlan.addEventListener('click', async () => {
     tourPlan = ordered.map(p => ({ place: p, tour: p._tour }));
     renderTourPanel(); updateCardBadges(); drawRouteOnMap();
     setPlanningMode(true);
+    markTourDirty();
 
     // Die Reihenfolge kommt aus der Routenoptimierung auf dem Server,
     // der KI-Text ist nur Kommentar dazu.
