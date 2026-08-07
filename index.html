@@ -2087,11 +2087,27 @@ btnGalleryPlan.addEventListener('click', async () => {
     renderTourPanel(); updateCardBadges(); drawRouteOnMap();
     setPlanningMode(true);
 
-    if (data.reasoning) {
-      aiResultBanner.innerHTML = `${icon('sparkles')} <strong>KI-Empfehlung:</strong> ${data.reasoning}${data.tip ? `<br>💡 <em>${data.tip}</em>` : ''} <button onclick="this.parentElement.style.display='none'" style="float:right;background:none;border:none;cursor:pointer;color:inherit;font-size:1rem;line-height:1">×</button>`;
-      aiResultBanner.classList.add('visible');
-      aiResultBanner.style.display = 'block';
-    }
+    // Die Reihenfolge kommt aus der Routenoptimierung auf dem Server,
+    // der KI-Text ist nur Kommentar dazu.
+    const h = Math.floor((data.driveMin || 0) / 60), m = (data.driveMin || 0) % 60;
+    const facts = data.km
+      ? `<div style="margin-top:5px">${icon('route')} <strong>${data.km} km</strong> Fahrt`
+        + ` · ca. ${h > 0 ? `${h} h ${m} Min` : `${m} Min`} unterwegs`
+        + (data.savedKm > 0 ? ` · <strong>${data.savedKm} km gespart</strong> gegenüber der Auswahlreihenfolge` : '')
+        + `</div>`
+      : '';
+    const head = data.reasoning
+      ? `${icon('sparkles')} <strong>Optimierte Route:</strong> ${esc(data.reasoning)}`
+      : `${icon('route')} <strong>Kürzeste Route berechnet.</strong>`
+        + (data.aiError ? ` <span style="opacity:0.7">(KI-Kommentar nicht verfügbar)</span>` : '');
+    aiResultBanner.innerHTML = head + facts
+      + (data.tip ? `<div style="margin-top:5px">${icon('lightbulb')} <em>${esc(data.tip)}</em></div>` : '')
+      + `<button id="ai-banner-close" style="float:right;background:none;border:none;cursor:pointer;color:inherit;display:flex;padding:0">${icon('x')}</button>`;
+    aiResultBanner.querySelector('#ai-banner-close').addEventListener('click', () => {
+      aiResultBanner.style.display = 'none';
+    });
+    aiResultBanner.classList.add('visible');
+    aiResultBanner.style.display = 'block';
     galleryOverlay.classList.remove('open');
   } catch (e) {
     alert('Fehler beim KI-Planen: ' + e.message);
