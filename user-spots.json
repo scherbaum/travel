@@ -1,5 +1,17 @@
 [
   {
+    "id": "mosto-cava-e-cucina",
+    "name": "Mosto Cava e Cucina",
+    "username": "mosto.cavaecucina",
+    "source_url": "https://www.instagram.com/mosto.cavaecucina?igsh=Zm1nazJnc3llN2Jk",
+    "image": "/images/mosto-cava-e-cucina.jpg",
+    "desc": "Restaurant direkt am Eingang der Cava d'Ispica — einer 13 km langen Schlucht zwischen Ispica und Modica. Das Lokal liegt in einem antiken Felsgewölbe, beleuchtet von Lichterketten. Regionale Küche, Sizilianische Weine, Null-Kilometer-Produkte. Unbedingt reservieren.",
+    "tags": ["Restaurant", "Wein", "Höhle", "Cava d'Ispica", "Ispica", "Ragusa"],
+    "lat": 36.783,
+    "lng": 14.912,
+    "category": "Restaurant"
+  },
+  {
     "id": "DblLA5jiCU6",
     "name": "Buchtipp: Zeitreise durch Sizilien",
     "username": "gira_con_noi_sicilia",
