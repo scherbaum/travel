@@ -12,6 +12,18 @@
     "category": "Restaurant"
   },
   {
+    "id": "Db5yIl0gmxO",
+    "name": "La Vacanza – Farm-to-Table Retreat in Noto",
+    "username": "ireneinsicily",
+    "source_url": "https://www.instagram.com/reel/Db5yIl0gmxO/",
+    "image": "/images/Db5yIl0gmxO.jpg",
+    "desc": "Irene, Architektin aus Argentinien, hat ihr Herz an Sizilien verloren und in Noto ein einwöchiges Retreat aufgebaut: „La Vacanza". Farm-to-Table-Küche, authentische Kochkurse (Cannoli, Busiate) und das echte, langsame Sizilien abseits der Touristenpfade. Sie hat die Küche selbst entworfen.",
+    "tags": ["Retreat", "Kochkurs", "Farm-to-Table", "Noto", "Erlebnis", "Cannoli", "Busiate"],
+    "lat": 36.8908,
+    "lng": 15.0670,
+    "category": "Erlebnis"
+  },
+  {
     "id": "DblLA5jiCU6",
     "name": "Buchtipp: Zeitreise durch Sizilien",
     "username": "gira_con_noi_sicilia",
